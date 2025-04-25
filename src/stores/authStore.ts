@@ -31,6 +31,23 @@ export const useAuthStore = defineStore("auth", () => {
       console.error("Error signing up:", error.message);
     } else {
       console.log("User signed up successfully:", data);
+
+      if (data.user)
+        supabase
+          .from("profiles")
+          .insert([
+            {
+              user_id: data.user.id,
+            },
+          ])
+          .then(({ error }) => {
+            if (error) {
+              console.error("Error inserting profile:", error.message);
+            } else {
+              console.log("Profile created successfully");
+            }
+          });
+
       router.push("/login");
     }
   }

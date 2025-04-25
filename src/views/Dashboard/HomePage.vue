@@ -60,8 +60,9 @@
       <Button @click="showQRCode = true" v-if="!showQRCode"
         ><QrCodeIcon />Tap to Reveal QR</Button
       >
+
       <div class="flex flex-1 justify-center items-center" v-else>
-        <qrcode-svg value="QRCODE.VUE 😄" level="H" />
+        <qrcode-svg :value="user?.qr_id" level="L" />
       </div>
     </div>
   </PageContainer>
@@ -75,12 +76,17 @@ import { EyeIcon, PlusCircleIcon, QrCodeIcon } from "lucide-vue-next";
 import { ProgressIndicator, ProgressRoot } from "reka-ui";
 import { computed, onMounted, ref } from "vue";
 import { QrcodeSvg } from "qrcode.vue";
+import { useAuthStore } from "@/stores/authStore";
+import { storeToRefs } from "pinia";
 
 const RADIUS = 45;
 const circumference = 2 * Math.PI * RADIUS;
 
 const progress = ref(0);
 const showQRCode = ref(false);
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
+console.log(user.value);
 
 const dashOffset = computed(() => (progress.value / 100) * circumference);
 

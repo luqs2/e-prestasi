@@ -4,7 +4,7 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref();
+  const user = ref<User>();
   const router = useRouter();
 
   async function login(email: string, password: string) {
@@ -17,6 +17,15 @@ export const useAuthStore = defineStore("auth", () => {
       console.error("Error logging in:", error.message);
     } else {
       console.log("User logged in successfully:", data);
+      if (data.user) {
+        const res = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", data.user.id)
+          .single();
+
+        user.value = res.data;
+      }
       router.push("/home");
     }
   }

@@ -73,7 +73,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/lib/supabase";
+import { useAuthStore } from "@/stores/authStore";
 import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { ref } from "vue";
@@ -82,6 +82,7 @@ import * as z from "zod";
 
 const router = useRouter();
 const isLoading = ref(false);
+const authStore = useAuthStore();
 
 const formSchema = toTypedSchema(
   z
@@ -112,21 +113,7 @@ const form = useForm({
 const onSubmit = form.handleSubmit(async (values) => {
   isLoading.value = true;
   console.log("Form submitted!", values);
-  await signUpNewUser(values.email, values.password);
+  await authStore.signUp(values.email, values.password);
   isLoading.value = false;
 });
-
-async function signUpNewUser(email: string, password: string) {
-  const { data, error } = await supabase.auth.signUp({
-    email: email,
-    password: password,
-  });
-
-  if (error) {
-    console.error("Error signing up:", error.message);
-  } else {
-    console.log("User signed up successfully:", data);
-    router.push("/login");
-  }
-}
 </script>

@@ -3,9 +3,18 @@ import { RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
+    path: "/",
+    redirect: "/login",
+  },
+  {
     path: "/login",
     name: "Login",
     component: () => import("../views/Auth/LoginPage.vue"),
+  },
+  {
+    path: "/signup",
+    name: "SignUp",
+    component: () => import("../views/Auth/SignUpPage.vue"),
   },
   {
     path: "/",
@@ -33,10 +42,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/Dashboard/Report/ReportDetails.vue"),
       },
       {
-        path: '/profile',
+        path: "/profile",
         name: "Profile",
         component: () => import("../views/Dashboard/ProfilePage.vue"),
-      }
+      },
     ],
   },
 ];

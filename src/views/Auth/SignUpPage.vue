@@ -29,11 +29,25 @@
             <FormMessage />
           </FormItem>
         </FormField>
-        <Button type="submit" class="w-full" :loading="isLoading">Login</Button>
+        <FormField v-slot="{ componentField }" name="confirmPassword">
+          <FormItem>
+            <FormLabel>Confirm Password</FormLabel>
+            <FormControl>
+              <Input
+                type="password"
+                placeholder="********"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <Button type="submit" :loading="isLoading" class="text-primary w-full">
+          Submit
+        </Button>
       </form>
-
-      <!-- Button to sign up -->
-      <Button @click="router.push('/signup')" variant="outline">Sign Up</Button>
+      <!-- Button to login -->
+      <Button @click="router.push('/login')" variant="outline">Login</Button>
     </div>
   </PageContainer>
 </template>
@@ -60,10 +74,25 @@ const router = useRouter();
 const isLoading = ref(false);
 
 const formSchema = toTypedSchema(
-  z.object({
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
-  })
+  z
+    .object({
+      email: z.string().email("Invalid email address"),
+      password: z
+        .string()
+        .min(6, "Password must be at least 6 characters long"),
+      confirmPassword: z
+        .string()
+        .min(6, "Password must be at least 6 characters long"),
+    })
+    .superRefine(({ confirmPassword, password }, ctx) => {
+      if (confirmPassword !== password) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Passwords must match",
+          path: ["confirmPassword"],
+        });
+      }
+    })
 );
 
 const form = useForm({
@@ -73,21 +102,20 @@ const form = useForm({
 const onSubmit = form.handleSubmit(async (values) => {
   isLoading.value = true;
   console.log("Form submitted!", values);
-
-  await login(values.email, values.password);
+  await signUpNewUser(values.email, values.password);
   isLoading.value = false;
 });
 
-async function login(email: string, password: string) {
-  const { data, error } = await supabase.auth.signInWithPassword({
+async function signUpNewUser(email: string, password: string) {
+  const { data, error } = await supabase.auth.signUp({
     email: email,
     password: password,
   });
 
   if (error) {
-    console.error("Error logging in:", error.message);
+    console.error("Error signing up:", error.message);
   } else {
-    console.log("User logged in successfully:", data);
+    console.log("User signed up successfully:", data);
   }
 }
 </script>

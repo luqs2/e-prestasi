@@ -32,8 +32,17 @@
         <Button type="submit" class="w-full" :loading="isLoading">Login</Button>
       </form>
 
-      <!-- Button to sign up -->
-      <Button @click="router.push('/signup')" variant="outline">Sign Up</Button>
+      <div class="flex items-center justify-end">
+        <!-- Button to sign up -->
+        <p class="text-sm">New here?</p>
+        <Button
+          @click="router.push('/signup')"
+          variant="link"
+          class="underline text-secondary"
+        >
+          Sign Up</Button
+        >
+      </div>
     </div>
   </PageContainer>
 </template>
@@ -88,6 +97,7 @@ async function login(email: string, password: string) {
     console.error("Error logging in:", error.message);
   } else {
     console.log("User logged in successfully:", data);
+    router.push("/home");
   }
 }
 </script>

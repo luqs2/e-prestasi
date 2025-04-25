@@ -6,4 +6,6 @@
   --color-secondary: #262625;
   --color-background: #FFF7F3;
   --color-muted: #F1F1F1;
+  --color-destructive: #FF4C4C;
+  --color-destructive-foreground: #FF4C4C;
 }

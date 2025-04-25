@@ -46,8 +46,18 @@
           Submit
         </Button>
       </form>
-      <!-- Button to login -->
-      <Button @click="router.push('/login')" variant="outline">Login</Button>
+
+      <div class="flex items-center justify-end">
+        <!-- Button to login -->
+        <p class="text-sm">Already have an account?</p>
+        <Button
+          @click="router.push('/login')"
+          variant="link"
+          class="underline text-secondary"
+        >
+          Login</Button
+        >
+      </div>
     </div>
   </PageContainer>
 </template>
@@ -116,6 +126,7 @@ async function signUpNewUser(email: string, password: string) {
     console.error("Error signing up:", error.message);
   } else {
     console.log("User signed up successfully:", data);
+    router.push("/login");
   }
 }
 </script>

@@ -37,10 +37,8 @@ import "./tailwind.css";
 import { createPinia } from "pinia";
 
 const pinia = createPinia();
-const app = createApp(App).use(IonicVue).use(router);
+const app = createApp(App).use(pinia).use(IonicVue).use(router);
 
 router.isReady().then(() => {
-  app.use(pinia);
-
   app.mount("#app");
 });

@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -13,19 +14,22 @@ export const useAuthStore = defineStore("auth", () => {
       password: password,
     });
 
-    if (error) {
-      console.error("Error logging in:", error.message);
-    } else {
-      console.log("User logged in successfully:", data);
-      if (data.user) {
-        const res = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", data.user.id)
-          .single();
+    if (error) console.error("Error logging in:", error.message);
 
-        user.value = res.data;
-      }
+    if (data.user) {
+      const res = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", data.user.id)
+        .single();
+
+      user.value = res.data;
+
+      await SecureStoragePlugin.set({
+        key: "user_data",
+        value: JSON.stringify(data.user),
+      });
+
       router.push("/home");
     }
   }
@@ -61,10 +65,22 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
+  async function logout() {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      console.error("Error logging out:", error.message);
+    } else {
+      user.value = undefined;
+      await SecureStoragePlugin.remove({ key: "user_data" });
+      router.push("/login");
+    }
+  }
   return {
     user,
 
     login,
     signUp,
+    logout,
   };
 });

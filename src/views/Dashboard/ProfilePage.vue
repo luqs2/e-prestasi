@@ -104,6 +104,8 @@
           </CardContent>
         </Card>
       </div>
+
+      <Button @click="handleLogout" :loading="isLoading">Log Out</Button>
     </div>
   </PageContainer>
 </template>
@@ -111,6 +113,7 @@
 <script setup lang="ts">
 import PageContainer from "@/components/PageContainer.vue";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import Toggle from "@/components/ui/button/Toggle.vue";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -121,6 +124,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useAuthStore } from "@/stores/authStore";
 import {
   ChevronRightIcon,
   MoonIcon,
@@ -132,6 +136,14 @@ import { ref } from "vue";
 const isDarkMode = ref(false);
 const isNotificationsOn = ref(false);
 const language = ref("english");
+const authStore = useAuthStore();
+const isLoading = ref(false);
+
+const handleLogout = async () => {
+  isLoading.value = true;
+  await authStore.logout();
+  isLoading.value = false;
+};
 
 //Watch for changes and apply theme
 // watch(isDarkMode, (newValue) => {

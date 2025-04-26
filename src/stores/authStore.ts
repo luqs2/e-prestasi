@@ -2,6 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<User>();
@@ -30,7 +31,11 @@ export const useAuthStore = defineStore("auth", () => {
         access_token: data.session.access_token,
         refresh_token: data.session.refresh_token,
       });
-      getUser();
+      await getUser();
+      toast("Success", {
+        description: "Logged in successfully",
+        position: "top-center",
+      });
       router.push("/home");
     }
   }
@@ -61,6 +66,11 @@ export const useAuthStore = defineStore("auth", () => {
               console.log("Profile created successfully");
             }
           });
+
+      toast("Success", {
+        description: "Signed up successfully",
+        position: "top-center",
+      });
 
       router.push("/login");
     }

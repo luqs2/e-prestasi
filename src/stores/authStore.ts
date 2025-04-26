@@ -1,5 +1,4 @@
 import { supabase } from "@/lib/supabase";
-import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
@@ -8,6 +7,17 @@ export const useAuthStore = defineStore("auth", () => {
   const user = ref<User>();
   const router = useRouter();
 
+  async function getUser() {
+    const { data } = await supabase.auth.getSession();
+    const res = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", data.session?.user.id)
+      .single();
+
+    user.value = res.data;
+  }
+
   async function login(email: string, password: string) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -15,21 +25,12 @@ export const useAuthStore = defineStore("auth", () => {
     });
 
     if (error) console.error("Error logging in:", error.message);
-
-    if (data.user) {
-      const res = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", data.user.id)
-        .single();
-
-      user.value = res.data;
-
-      await SecureStoragePlugin.set({
-        key: "user_data",
-        value: JSON.stringify(data.user),
+    if (data.session) {
+      supabase.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
       });
-
+      getUser();
       router.push("/home");
     }
   }
@@ -44,7 +45,6 @@ export const useAuthStore = defineStore("auth", () => {
       console.error("Error signing up:", error.message);
     } else {
       console.log("User signed up successfully:", data);
-
       if (data.user)
         supabase
           .from("profiles")
@@ -73,13 +73,13 @@ export const useAuthStore = defineStore("auth", () => {
       console.error("Error logging out:", error.message);
     } else {
       user.value = undefined;
-      await SecureStoragePlugin.remove({ key: "user_data" });
       router.push("/login");
     }
   }
   return {
     user,
 
+    getUser,
     login,
     signUp,
     logout,

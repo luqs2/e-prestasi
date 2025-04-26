@@ -1,6 +1,6 @@
+import { supabase } from "@/lib/supabase";
 import { useAuthStore } from "@/stores/authStore";
 import { createRouter, createWebHistory } from "@ionic/vue-router";
-import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
@@ -59,17 +59,18 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   try {
-    const user = await SecureStoragePlugin.get({
-      key: "user_data",
-    });
+    const { data } = await supabase.auth.getSession();
+
+    if (data.session) {
+      const authStore = useAuthStore();
+      await authStore.getUser();
+    }
 
     const isAuthRoute = to.path === "/login" || to.path === "/signup";
 
-    if (user?.value && isAuthRoute) {
-      const authStore = useAuthStore();
-      authStore.user = JSON.parse(user.value) as User;
+    if (data.session && isAuthRoute) {
       next("/home");
-    } else if (!user?.value && !isAuthRoute) {
+    } else if (!data.session && !isAuthRoute) {
       next("/login");
     } else {
       next();

@@ -9,14 +9,14 @@
 
       <!-- Card Progress-->
       <Card variant="dark">
-        <CardContent class="flex gap-8">
-          <div class="flex flex-col gap-1">
+        <CardContent class="flex gap-8 p-4">
+          <div class="flex flex-col gap-1 flex-1">
             <p class="text-primary font-semibold text-lg">Excellent!</p>
             <p class="font-semibold text-lg">Your todays plan is almost done</p>
           </div>
 
           <!-- Circle Progress -->
-          <div class="relative h-full aspect-square">
+          <div class="relative h-full aspect-square size-36">
             <ProgressRoot v-model="progress" as-child>
               <svg class="w-full h-full" viewBox="0 0 100 100">
                 <!-- Background circle -->
@@ -49,18 +49,41 @@
 
       <!-- Todays Schedule -->
       <p class="text-sm font-bold">Today's Schedule</p>
-      <Card><CardContent> </CardContent></Card>
-      <Card><CardContent> </CardContent></Card>
+      <div class="flex gap-4">
+        <Card class="flex flex-1"
+          ><CardContent class="flex flex-col gap-4 p-4">
+            <img src="" class="size-24" />
+
+            <div class="flex flex-1 flex-col gap-1">
+              <p class="text-xs font-medium">DES 3073</p>
+              <p class="text-sm font-bold">UI/UX Design</p>
+              <p class="text-xs font-light">10:00am - 12:00pm</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card class="flex flex-1"
+          ><CardContent class="flex flex-col gap-4 p-4">
+            <img src="" class="size-24" />
+
+            <div class="flex flex-1 flex-col gap-1">
+              <p class="text-xs font-medium">DES 3073</p>
+              <p class="text-sm font-bold">UI/UX Design</p>
+              <p class="text-xs font-light">10:00am - 12:00pm</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <!-- Buttons -->
       <div class="flex flex-row gap-4 flex-1">
         <Button class="flex flex-1"><EyeIcon />View All</Button>
         <Button class="flex flex-1"><PlusCircleIcon />Add Class</Button>
       </div>
-      <Button @click="showQRCode = true" v-if="!showQRCode"
-        ><QrCodeIcon />Tap to Reveal QR</Button
-      >
 
+      <Button @click="showQRCode = true" v-if="!showQRCode">
+        <QrCodeIcon />
+        Tap to Reveal QR
+      </Button>
       <div class="flex flex-1 justify-center items-center" v-else>
         <qrcode-svg :value="user?.qr_id" level="L" />
       </div>

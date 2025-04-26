@@ -51,6 +51,7 @@ export const useAuthStore = defineStore("auth", () => {
           .insert([
             {
               user_id: data.user.id,
+              email: data.user.email,
             },
           ])
           .then(({ error }) => {

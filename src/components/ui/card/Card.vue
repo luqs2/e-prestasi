@@ -19,7 +19,7 @@ const variantClasses = {
     data-slot="card"
     :class="
       cn(
-        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
+        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-0 shadow-sm',
         props.class,
         variantClasses[props.variant || 'default']
       )

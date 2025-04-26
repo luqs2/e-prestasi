@@ -58,7 +58,6 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  console.log("yes3");
   try {
     const user = await SecureStoragePlugin.get({
       key: "user_data",

@@ -142,9 +142,9 @@ export const useClassStore = defineStore("class", () => {
 
   async function getClassById(classId: number) {
     // First check if class is already in the loaded classes
-    const foundClass = classes.value.find(c => c.id === classId);
+    const foundClass = classes.value.find((c) => c.id === classId);
     if (foundClass) return foundClass;
-    
+
     // Otherwise fetch from database
     const { data, error } = await supabase
       .from("classes")
@@ -156,8 +156,121 @@ export const useClassStore = defineStore("class", () => {
       console.error("Error fetching class details:", error.message);
       throw error;
     }
-    
+
     return data as Class;
+  }
+
+  async function getStudentsInClass(classId: number) {
+    console.log("Fetching students in class with ID:", classId);
+    const { data, error } = await supabase
+      .from("student_class")
+      .select("points, profiles(*)")
+      .eq("class_id", classId);
+
+    console.log(data);
+
+    if (error) {
+      console.error("Error fetching students in class:", error.message);
+      throw error;
+    }
+
+    return data.map((item) => item);
+  }
+
+  async function addCriteria(
+    classId: number,
+    criteriaName: string,
+    value: string
+  ) {
+    try {
+      // First insert the criteria
+      const { data: criteriaData, error: criteriaError } = await supabase
+        .from("criterias")
+        .insert([
+          {
+            name: criteriaName,
+            value: value,
+          },
+        ])
+        .select()
+        .single();
+
+      if (criteriaError) throw criteriaError;
+      if (!criteriaData) throw new Error("No criteria data returned");
+
+      // Then create the class-criteria relationship
+      const { error: relationError } = await supabase
+        .from("class_criterias")
+        .insert([
+          {
+            class_id: classId,
+            criteria_id: criteriaData.id,
+          },
+        ]);
+
+      if (relationError) throw relationError;
+
+      toast("Success", {
+        description: "Criteria added successfully",
+        position: "top-center",
+      });
+
+      return criteriaData;
+    } catch (error) {
+      console.error("Error adding criteria:", error);
+      toast("Error", {
+        description: "Failed to add criteria",
+        position: "top-center",
+      });
+      throw error;
+    }
+  }
+
+  async function getCriterias(classId: number) {
+    const { data, error } = await supabase
+      .from("class_criterias")
+      .select("criterias(*)")
+      .eq("class_id", classId);
+
+    if (error) {
+      console.error("Error fetching criterias:", error.message);
+      throw error;
+    }
+
+    return data.map((item) => item.criterias);
+  }
+
+  async function removeCriteria(classId: number, criteriaId: number) {
+    try {
+      // First delete the class-criteria relationship
+      const { error: relationError } = await supabase
+        .from("class_criterias")
+        .delete()
+        .eq("class_id", classId)
+        .eq("criteria_id", criteriaId);
+
+      if (relationError) throw relationError;
+
+      // Then delete the criteria itself
+      const { error: criteriaError } = await supabase
+        .from("criterias")
+        .delete()
+        .eq("id", criteriaId);
+
+      if (criteriaError) throw criteriaError;
+
+      toast("Success", {
+        description: "Criteria removed successfully",
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error("Error removing criteria:", error);
+      toast("Error", {
+        description: "Failed to remove criteria",
+        position: "top-center",
+      });
+      throw error;
+    }
   }
 
   return {
@@ -168,6 +281,10 @@ export const useClassStore = defineStore("class", () => {
     getJoinedClasses,
     createClass,
     joinClass,
-    getClassById, // Add the new function
+    getClassById,
+    getStudentsInClass,
+    addCriteria,
+    getCriterias,
+    removeCriteria,
   };
 });

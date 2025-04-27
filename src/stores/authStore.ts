@@ -40,7 +40,12 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  async function signUp(email: string, password: string) {
+  async function signUp(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ) {
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
@@ -56,6 +61,8 @@ export const useAuthStore = defineStore("auth", () => {
           .insert([
             {
               user_id: data.user.id,
+              firstName: firstName,
+              lastName: lastName,
               email: data.user.email,
             },
           ])

@@ -16,7 +16,6 @@
               <Card
                 v-for="cls in classes"
                 :key="cls.id"
-                variant="button"
                 @click="router.push(`/class/details/${cls.id}`)"
               >
                 <CardContent class="flex items-center p-4">
@@ -61,7 +60,6 @@
               <Card
                 v-for="cls in joinedClasses"
                 :key="cls.id"
-                variant="button"
                 @click="router.push(`/class/details/${cls.id}`)"
               >
                 <CardContent class="flex items-center p-4">
@@ -112,7 +110,7 @@ import { storeToRefs } from "pinia";
 import { IonSpinner } from "@ionic/vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinClassSheet from "@/components/JoinClassSheet.vue";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const isAddSheetOpen = ref(false);
 const isJoinSheetOpen = ref(false);
@@ -120,7 +118,6 @@ const classStore = useClassStore();
 const { classes, joinedClasses } = storeToRefs(classStore);
 const isLoading = ref(true);
 const router = useRouter();
-
 
 onMounted(async () => {
   await classStore.getClasses();

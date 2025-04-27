@@ -2,6 +2,24 @@
   <PageContainer>
     <div class="flex flex-col gap-6">
       <form @submit="onSubmit" class="flex flex-col gap-4">
+        <FormField v-slot="{ componentField }" name="firstName">
+          <FormItem>
+            <FormLabel>First Name</FormLabel>
+            <FormControl>
+              <Input type="text" placeholder="Luqman" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
+        <FormField v-slot="{ componentField }" name="lastName">
+          <FormItem>
+            <FormLabel>Last Name</FormLabel>
+            <FormControl>
+              <Input type="text" placeholder="Haqim" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
         <FormField v-slot="{ componentField }" name="email">
           <FormItem>
             <FormLabel>Email</FormLabel>
@@ -87,6 +105,8 @@ const authStore = useAuthStore();
 const formSchema = toTypedSchema(
   z
     .object({
+      firstName: z.string().min(1, "First name is required"),
+      lastName: z.string().min(1, "Last name is required"),
       email: z.string().email("Invalid email address"),
       password: z
         .string()
@@ -113,7 +133,7 @@ const form = useForm({
 const onSubmit = form.handleSubmit(async (values) => {
   isLoading.value = true;
   console.log("Form submitted!", values);
-  await authStore.signUp(values.email, values.password);
+  await authStore.signUp(values.email, values.password, values.firstName, values.lastName);
   isLoading.value = false;
 });
 </script>

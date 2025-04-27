@@ -31,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "/class",
         name: "Class",
-        component: () => import("../views/Dashboard/ClassPage.vue"),
+        component: () => import("../views/Dashboard/Class/ClassPage.vue"),
       },
       {
         path: "/report",
@@ -52,8 +52,7 @@ const routes: Array<RouteRecordRaw> = [
         path: "/class/details/:id",
         name: "ClassDetails",
         component: () => import("../views/Dashboard/Class/ClassDetails.vue"),
-
-      }
+      },
     ],
   },
 ];

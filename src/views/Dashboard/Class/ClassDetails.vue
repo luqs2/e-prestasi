@@ -4,7 +4,9 @@
       <IonSpinner class="size-12" />
     </div>
 
+
     <div v-else-if="classDetails" class="flex flex-col gap-6">
+      <!-- Keep existing header -->
       <div class="flex items-center gap-4">
         <Button variant="outline" size="iconsm" @click="router.back()">
           <ChevronLeft class="size-6 text-primary" />
@@ -222,7 +224,10 @@
 </template>
 
 <script setup lang="ts">
+import AddCriteriaSheet from "@/components/AddCriteriaSheet.vue";
 import PageContainer from "@/components/PageContainer.vue";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -238,11 +243,16 @@ import {
   Award,
 } from "lucide-vue-next";
 import { IonSpinner } from "@ionic/vue";
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ClipboardList,
+  PlusCircleIcon,
+  QrCodeIcon,
+  Share2,
+} from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useClassStore } from "@/stores/classStore";
-import { Avatar } from "@/components/ui/avatar";
-import { supabase } from "@/lib/supabase";
 
 const route = useRoute();
 const router = useRouter();
@@ -250,6 +260,9 @@ const classStore = useClassStore();
 const classDetails = ref<Class | null>(null);
 const isLoading = ref(true);
 const currentUserId = ref<string | null>(null);
+const students = ref<any[]>([]);
+const criterias = ref<any[]>([]);
+const isAddCriteriaOpen = ref(false);
 
 // Hardcoded tasks (since we don't have a backend for tasks yet)
 const classTasks = ref([
@@ -279,6 +292,8 @@ const classTasks = ref([
     title: "Research Paper",
     description: "Submit your research paper (5 pages minimum)",
     dueDate: "2025-05-20",
+    status: "pending",
+  },
     status: "pending",
   },
 ]);
@@ -340,10 +355,27 @@ onMounted(async () => {
     }
 
     classDetails.value = await classStore.getClassById(classId);
+
+    if (classDetails.value) {
+      students.value = await classStore.getStudentsInClass(
+        classDetails.value?.id
+      );
+      criterias.value = await classStore.getCriterias(classDetails.value?.id);
+    }
   } catch (error) {
     console.error("Error fetching class details:", error);
   } finally {
     isLoading.value = false;
   }
 });
+
+const handleRemoveCriteria = async (criteriaId: number) => {
+  await classStore.removeCriteria(classDetails.value?.id as number, criteriaId);
+  refreshCriterias();
+};
+
+const handleScanCriteria = (criteriaId: number) => {
+  // Handle QR code scanning for criteria
+  console.log("Scan criteria with ID:", criteriaId);
+};
 </script>

@@ -4,4 +4,6 @@ interface User {
   user_id: string;
   qr_id: string;
   email: string;
+  firstName: string;
+  lastName: string;
 }

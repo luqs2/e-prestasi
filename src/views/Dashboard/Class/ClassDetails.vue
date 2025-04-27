@@ -90,42 +90,67 @@
               <h2 class="text-xl font-bold">Criteria Management</h2>
             </div>
 
-            <div v-if="criterias.length === 0" class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg">
+            <div
+              v-if="criterias.length === 0"
+              class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg"
+            >
               <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-              <p class="text-muted-foreground font-medium">No criteria defined yet</p>
+              <p class="text-muted-foreground font-medium">
+                No criteria defined yet
+              </p>
               <p class="text-sm text-muted-foreground/70 mt-1">
                 Add criteria to evaluate student performance
               </p>
             </div>
 
-            <Card v-for="criteria in criterias" :key="criteria.id" class="overflow-hidden">
+            <Card
+              v-for="criteria in criterias"
+              :key="criteria.id"
+              class="overflow-hidden"
+            >
               <CardContent class="p-4 flex items-center justify-between">
                 <div class="flex-1">
                   <h3 class="font-medium">{{ criteria.name }}</h3>
-                  <p v-if="criteria.description" class="text-sm text-muted-foreground">
+                  <p
+                    v-if="criteria.description"
+                    class="text-sm text-muted-foreground"
+                  >
                     {{ criteria.description }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <Badge class="mr-2">
-                    {{ criteria.value || 1 }} points
-                  </Badge>
-                  <Button variant="ghost" size="sm" @click="handleScanCriteria(criteria.id)" title="Scan QR to award points">
+                  <Badge class="mr-2"> {{ criteria.value || 1 }} points </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="handleScanCriteria(criteria.id)"
+                    title="Scan QR to award points"
+                  >
                     <QrCodeIcon class="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" @click="handleEditCriteria(criteria)" title="Edit criteria">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="handleEditCriteria(criteria)"
+                    title="Edit criteria"
+                  >
                     <PencilIcon class="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" @click="confirmDeleteCriteria(criteria.id)" title="Delete criteria">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="confirmDeleteCriteria(criteria.id)"
+                    title="Delete criteria"
+                  >
                     <TrashIcon class="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Button 
-              class="w-full flex items-center justify-center mt-4" 
-              variant="outline" 
+            <Button
+              class="w-full flex items-center justify-center mt-4"
+              variant="outline"
               @click="isAddCriteriaOpen = true"
             >
               <PlusCircleIcon class="h-5 w-5 mr-2" />
@@ -205,26 +230,34 @@
       <p class="text-lg font-medium">Class not found</p>
       <Button @click="router.back()">Go Back</Button>
     </div>
-  </PageContainer>
 
-  <Dialog :open="isDeleteDialogOpen" @update:open="isDeleteDialogOpen = $event">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          <span class="text-destructive">Delete Criteria</span>
+    <Dialog
+      :open="isDeleteDialogOpen"
+      @update:open="isDeleteDialogOpen = $event"
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <span class="text-destructive">Delete Criteria</span>
           </DialogTitle>
-        <DialogDescription>
-          <span class="text-sm text-secondary">
-            Are you sure you want to delete this criteria? This action cannot be undone.
-          </span>
-        </DialogDescription>
-      </DialogHeader>
-      <div class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isDeleteDialogOpen = false"><span class="text-secondary">Cancel</span></Button>
-        <Button variant="destructive" @click="confirmDelete"><span class="text-secondary">Delete</span></Button>
-      </div>
-    </DialogContent>
-  </Dialog>
+          <DialogDescription>
+            <span class="text-sm text-secondary">
+              Are you sure you want to delete this criteria? This action cannot
+              be undone.
+            </span>
+          </DialogDescription>
+        </DialogHeader>
+        <div class="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" @click="isDeleteDialogOpen = false"
+            ><span class="text-secondary">Cancel</span></Button
+          >
+          <Button variant="destructive" @click="confirmDelete"
+            ><span class="text-secondary">Delete</span></Button
+          >
+        </div>
+      </DialogContent>
+    </Dialog>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

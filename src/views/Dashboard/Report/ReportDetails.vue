@@ -1,7 +1,7 @@
 <template>
   <PageContainer>
     <div class="flex flex-col gap-4">
-      <div class="flex gap-4">
+      <div class="flex gap-2 items-center">
         <Button
           variant="outline"
           class="border-primary text-primary size-8 aspect-square rounded-full"

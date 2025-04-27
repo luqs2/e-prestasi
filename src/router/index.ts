@@ -53,6 +53,12 @@ const routes: Array<RouteRecordRaw> = [
         name: "ClassDetails",
         component: () => import("../views/Dashboard/Class/ClassDetails.vue"),
 
+      },
+      {
+        path: "/class/evaluation-criteria",
+        name: "evaluationCriteria",
+        component: () => import("../views/Dashboard/Class/EvaluationCriteria.vue"),
+
       }
     ],
   },

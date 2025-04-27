@@ -82,6 +82,20 @@
         </FormItem>
       </FormField>
 
+      <FormField v-slot="{ componentField }" name="classGroup">
+        <FormItem>
+          <FormLabel>Group</FormLabel>
+          <FormControl>
+            <Input
+              type="text"
+              placeholder="A"
+              v-bind="componentField"
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      </FormField>
+
       <Button type="submit" :loading="isLoading">Add Class</Button>
     </form>
   </BottomSheet>
@@ -123,6 +137,7 @@ const newClassScheme = toTypedSchema(
     day: z.string().min(1, "Day is required"),
     timeFrom: z.string().min(1, "Time from is required"),
     timeTo: z.string().min(1, "Time to is required"),
+    classGroup: z.string().min(1, "Class group is required"),
   })
 );
 
@@ -140,7 +155,8 @@ const onSubmit = handleSubmit(async (values) => {
       values.className,
       values.day,
       values.timeFrom,
-      values.timeTo
+      values.timeTo,
+      values.classGroup
     )
     .then(() => {
       model.value = false;

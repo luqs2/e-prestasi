@@ -13,7 +13,12 @@
 
           <template v-else>
             <template v-if="classes.length > 0">
-              <Card v-for="cls in classes" :key="cls.id">
+              <Card
+                v-for="cls in classes"
+                :key="cls.id"
+                variant="button"
+                @click="router.push(`/class/details/${cls.id}`)"
+              >
                 <CardContent class="flex items-center p-4">
                   <div class="flex flex-1 flex-col gap-1">
                     <p class="text-xs font-medium">{{ cls.classCode }}</p>
@@ -24,11 +29,11 @@
                   </div>
 
                   <Avatar>
-                    <AvatarImage
-                      src="https://github.com/unovue.png"
-                      alt="@unovue"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <div
+                      class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold"
+                    >
+                      {{ cls.classGroup }}
+                    </div>
                   </Avatar>
                 </CardContent>
               </Card>
@@ -64,11 +69,11 @@
                   </div>
 
                   <Avatar>
-                    <AvatarImage
-                      src="https://github.com/unovue.png"
-                      alt="@unovue"
-                    />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <div
+                      class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold"
+                    >
+                      {{ cls.classGroup }}
+                    </div>
                   </Avatar>
                 </CardContent>
               </Card>
@@ -92,7 +97,7 @@
 <script setup lang="ts">
 import PageContainer from "@/components/PageContainer.vue";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { PlusCircleIcon } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import NewClassSheet from "@/components/NewClassSheet.vue";
@@ -102,12 +107,15 @@ import { storeToRefs } from "pinia";
 import { IonSpinner } from "@ionic/vue";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import JoinClassSheet from "@/components/JoinClassSheet.vue";
+import { useRouter } from 'vue-router';
 
 const isAddSheetOpen = ref(false);
 const isJoinSheetOpen = ref(false);
 const classStore = useClassStore();
 const { classes, joinedClasses } = storeToRefs(classStore);
 const isLoading = ref(true);
+const router = useRouter();
+
 
 onMounted(async () => {
   await classStore.getClasses();

@@ -36,6 +36,7 @@ export const useClassStore = defineStore("class", () => {
           day,
           timeFrom,
           timeTo,
+          classGroup,
           user_id,
           created_at)
       `
@@ -58,7 +59,8 @@ export const useClassStore = defineStore("class", () => {
     className: string,
     day: string,
     timeFrom: string,
-    timeTo: string
+    timeTo: string,
+    classGroup: string
   ) {
     const userId = (await supabase.auth.getSession()).data.session?.user.id;
     const { data, error } = await supabase
@@ -70,6 +72,7 @@ export const useClassStore = defineStore("class", () => {
           day: day,
           timeFrom: timeFrom,
           timeTo: timeTo,
+          classGroup: classGroup,
           user_id: userId,
         },
       ])
@@ -137,6 +140,26 @@ export const useClassStore = defineStore("class", () => {
     }
   }
 
+  async function getClassById(classId: number) {
+    // First check if class is already in the loaded classes
+    const foundClass = classes.value.find(c => c.id === classId);
+    if (foundClass) return foundClass;
+    
+    // Otherwise fetch from database
+    const { data, error } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("id", classId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching class details:", error.message);
+      throw error;
+    }
+    
+    return data as Class;
+  }
+
   return {
     classes,
     joinedClasses,
@@ -145,5 +168,6 @@ export const useClassStore = defineStore("class", () => {
     getJoinedClasses,
     createClass,
     joinClass,
+    getClassById, // Add the new function
   };
 });

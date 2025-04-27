@@ -131,24 +131,54 @@ import {
   Share2Icon,
   SunIcon,
 } from "lucide-vue-next";
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 
+// Initialize darkMode from localStorage or system preference
 const isDarkMode = ref(false);
 const isNotificationsOn = ref(false);
 const language = ref("english");
 const authStore = useAuthStore();
 const isLoading = ref(false);
 
+// Initialize dark mode based on stored preference or system preference
+onMounted(() => {
+  // Check localStorage first
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme) {
+    isDarkMode.value = storedTheme === 'dark';
+  } else {
+    // If no stored preference, check system preference
+    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  
+  // Apply the theme immediately on mount
+  applyTheme(isDarkMode.value);
+});
+
+// Watch for changes and apply theme
+watch(isDarkMode, (newValue) => {
+  applyTheme(newValue);
+  // Store preference
+  localStorage.setItem('theme', newValue ? 'dark' : 'light');
+});
+
+// Function to apply theme
+const applyTheme = (isDark: boolean) => {
+  if (isDark) {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+  
+  // Debug output to verify what's happening
+  console.log('Dark mode:', isDark, document.documentElement.classList.contains('dark'));
+};
+
 const handleLogout = async () => {
   isLoading.value = true;
   await authStore.logout();
   isLoading.value = false;
 };
-
-//Watch for changes and apply theme
-// watch(isDarkMode, (newValue) => {
-//   document.documentElement.classList.toggle('dark', newValue);
-// });
 </script>
 
 <style scoped></style>

@@ -4,13 +4,14 @@ import { cn } from "@/lib/utils";
 
 const props = defineProps<{
   class?: HTMLAttributes["class"];
-  variant?: "default" | "dark" | "outline";
+  variant?: "default" | "dark" | "outline" | "card";
 }>();
 
 const variantClasses = {
   default: "bg-white border-none",
   dark: "bg-secondary text-white",
   outline: "border border-primary text-primary",
+  button: "bg-white border-none cursor-pointer active:bg-primary-foreground",
 };
 </script>
 

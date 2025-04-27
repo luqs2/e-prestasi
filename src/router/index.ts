@@ -48,6 +48,12 @@ const routes: Array<RouteRecordRaw> = [
         name: "Profile",
         component: () => import("../views/Dashboard/ProfilePage.vue"),
       },
+      {
+        path: "/class/details/:id",
+        name: "ClassDetails",
+        component: () => import("../views/Dashboard/Class/ClassDetails.vue"),
+
+      }
     ],
   },
 ];

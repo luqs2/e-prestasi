@@ -5,7 +5,7 @@
         <TabsTrigger value="myClassesReports"> My Classes </TabsTrigger>
         <TabsTrigger value="joinedClassesReports"> Joined Classes </TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="myClassesReports">
         <div class="flex flex-col gap-4">
           <div class="flex flex-1 items-center justify-center" v-if="isLoading">
@@ -20,11 +20,15 @@
                     <div class="flex flex-1 flex-col gap-1">
                       <p class="text-xs font-medium">{{ cls.classCode }}</p>
                       <p class="text-sm font-bold">{{ cls.className }}</p>
-                      <p class="text-xs font-light">{{ cls.timeFrom }} - {{ cls.timeTo }}</p>
+                      <p class="text-xs font-light">
+                        {{ cls.timeFrom }} - {{ cls.timeTo }}
+                      </p>
                     </div>
 
                     <Avatar>
-                      <div class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold">
+                      <div
+                        class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold"
+                      >
                         {{ cls.classGroup }}
                       </div>
                     </Avatar>
@@ -79,7 +83,7 @@
           </template>
         </div>
       </TabsContent>
-      
+
       <TabsContent value="joinedClassesReports">
         <div class="flex flex-col gap-4">
           <div class="flex flex-1 items-center justify-center" v-if="isLoading">
@@ -94,14 +98,20 @@
                     <div class="flex flex-1 flex-col gap-1">
                       <p class="text-xs font-medium">{{ cls.classCode }}</p>
                       <p class="text-sm font-bold">{{ cls.className }}</p>
-                      <p class="text-xs font-light">{{ cls.timeFrom }} - {{ cls.timeTo }}</p>
+                      <p class="text-xs font-light">
+                        {{ cls.timeFrom }} - {{ cls.timeTo }}
+                      </p>
                     </div>
 
                     <Avatar>
-                      <div class="flex h-full w-full items-center justify-center rounded-full bg-amber-300 text-black font-medium">
+                      <div
+                        class="flex h-full w-full items-center justify-center rounded-full bg-amber-300 text-black font-medium"
+                      >
                         {{ getClassInitials(cls.className) }}
                       </div>
-                      <AvatarFallback>{{ getClassInitials(cls.className) }}</AvatarFallback>
+                      <AvatarFallback>{{
+                        getClassInitials(cls.className)
+                      }}</AvatarFallback>
                     </Avatar>
                   </div>
 
@@ -173,11 +183,11 @@ import { storeToRefs } from "pinia";
 const router = useRouter();
 const classStore = useClassStore();
 const { classes, joinedClasses } = storeToRefs(classStore);
-const myClasses = ref([]);
-const joinedClassesData = ref([]);
+const myClasses = ref<any[]>([]);
+const joinedClassesData = ref<any[]>([]);
 const isLoading = ref(true);
 
-function getClassInitials(className) {
+function getClassInitials(className: string) {
   return className
     .split(" ")
     .map((word) => word[0])
@@ -188,14 +198,14 @@ onMounted(async () => {
   try {
     await classStore.getClasses();
     await classStore.getJoinedClasses();
-    
+
     // Map classes to the format expected by the report view
-    myClasses.value = classes.value.map(cls => ({
+    myClasses.value = classes.value.map((cls) => ({
       ...cls,
       // Performance data would be added here in a real implementation
     }));
-    
-    joinedClassesData.value = joinedClasses.value.map(cls => ({
+
+    joinedClassesData.value = joinedClasses.value.map((cls) => ({
       ...cls,
       // Performance data would be added here in a real implementation
     }));

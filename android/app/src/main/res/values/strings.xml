@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ePrestasi</string>
+    <string name="title_activity_main">ePrestasi</string>
+    <string name="package_name">com.eprestasi.app</string>
+    <string name="custom_url_scheme">com.eprestasi.app</string>
+</resources>

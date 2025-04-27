@@ -273,6 +273,74 @@ export const useClassStore = defineStore("class", () => {
     }
   }
 
+  async function awardPoints(
+    classId: number,
+    studentId: string,
+    criteriaId: number
+  ) {
+    try {
+      // First check if the student is already in the class
+      const { data: studentData, error: studentError } = await supabase
+        .from("student_class")
+        .select("*")
+        .eq("class_id", classId)
+        .eq("user_id", studentId)
+        .single();
+
+      if (studentError) throw studentError;
+      if (!studentData) {
+        toast("Error", {
+          description: "Student not found in this class",
+          position: "top-center",
+        });
+        return;
+      }
+
+      //Get the criteria value
+      const { data: criteriaData, error: criteriaError } = await supabase
+        .from("criterias")
+        .select("value")
+        .eq("id", criteriaId)
+        .single();
+
+      if (criteriaError) throw criteriaError;
+      if (!criteriaData) {
+        toast("Error", {
+          description: "Criteria not found",
+          position: "top-center",
+        });
+        return;
+      }
+
+      // Then award points to the student
+      const { error: pointsError } = await supabase
+        .from("student_class")
+        .update({
+          points: studentData.points + parseInt(criteriaData.value),
+          history: [
+            ...studentData.history,
+            `${studentData.points} + ${criteriaData.value}`,
+          ],
+        })
+        .eq("class_id", classId)
+        .eq("user_id", studentId);
+
+      if (pointsError) throw pointsError;
+
+      toast("Success", {
+        description: "Points awarded successfully",
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error("Error awarding points:", error);
+      toast("Error", {
+        description: "Failed to award points",
+        position: "top-center",
+      });
+      throw error;
+    }
+  }
+
   return {
     classes,
     joinedClasses,
@@ -286,5 +354,6 @@ export const useClassStore = defineStore("class", () => {
     addCriteria,
     getCriterias,
     removeCriteria,
+    awardPoints,
   };
 });

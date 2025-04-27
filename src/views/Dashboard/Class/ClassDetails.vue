@@ -200,6 +200,10 @@ import {
 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
+} from "@capacitor/barcode-scanner";
 
 const route = useRoute();
 const router = useRouter();
@@ -210,6 +214,8 @@ const currentUserId = ref<string | null>(null);
 const students = ref<any[]>([]);
 const criterias = ref<any[]>([]);
 const isAddCriteriaOpen = ref(false);
+const isScanning = ref(false);
+const scanError = ref<string | null>(null);
 
 // Hardcoded tasks (since we don't have a backend for tasks yet)
 const classTasks = ref([
@@ -313,8 +319,44 @@ const handleRemoveCriteria = async (criteriaId: number) => {
   refreshCriterias();
 };
 
-const handleScanCriteria = (criteriaId: number) => {
-  // Handle QR code scanning for criteria
-  console.log("Scan criteria with ID:", criteriaId);
+const handleScanCriteria = async (criteriaId: number) => {
+  console.log("Scanning criteria with ID:", criteriaId);
+  try {
+    // Prepare UI for scanning
+    isScanning.value = true;
+    document.querySelector("body")?.classList.add("scanner-active");
+
+    // Start scanning
+    const result = await CapacitorBarcodeScanner.scanBarcode({
+      hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+    });
+
+    if (result.ScanResult) {
+      console.log("Scanned content:", result.ScanResult);
+      // Handle the scanned QR code content here
+      // You might want to validate the content or process it further
+
+      await classStore.awardPoints(
+        classDetails.value?.id as number,
+        result.ScanResult,
+        criteriaId
+      );
+
+      // Refresh the student list after updating points
+      if (classDetails.value) {
+        students.value = await classStore.getStudentsInClass(
+          classDetails.value.id
+        );
+      }
+    }
+  } catch (error) {
+    console.error("Scanning failed:", error);
+    scanError.value =
+      error instanceof Error ? error.message : "Failed to scan QR code";
+  } finally {
+    // Cleanup
+    isScanning.value = false;
+    document.querySelector("body")?.classList.remove("scanner-active");
+  }
 };
 </script>

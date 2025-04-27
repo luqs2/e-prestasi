@@ -85,34 +85,63 @@
         </TabsContent>
 
         <TabsContent value="criteria">
-          <!-- Add your criteria management content here -->
           <div class="flex flex-col gap-4">
-            <h2 class="text-xl font-bold">Criteria Management</h2>
+            <div class="flex justify-between items-center">
+              <h2 class="text-xl font-bold">Criteria Management</h2>
+            </div>
 
-            <Card v-for="criteria in criterias" :key="criteria.id">
-              <CardContent class="flex gap-2">
-                <p class="flex flex-1">
-                  {{ criteria.name }}
-                </p>
-                <Button @click="handleScanCriteria(criteria.id)">
-                  <QrCodeIcon />
-                </Button>
-                <Button @click="handleRemoveCriteria(criteria.id)"
-                  >Remove</Button
-                >
-                <Badge>
-                  {{ criteria.value }}
-                </Badge>
+            <div v-if="criterias.length === 0" class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg">
+              <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
+              <p class="text-muted-foreground font-medium">No criteria defined yet</p>
+              <p class="text-sm text-muted-foreground/70 mt-1">
+                Add criteria to evaluate student performance
+              </p>
+            </div>
+
+            <Card v-for="criteria in criterias" :key="criteria.id" class="overflow-hidden">
+              <CardContent class="p-4 flex items-center justify-between">
+                <div class="flex-1">
+                  <h3 class="font-medium">{{ criteria.name }}</h3>
+                  <p v-if="criteria.description" class="text-sm text-muted-foreground">
+                    {{ criteria.description }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <Badge class="mr-2">
+                    {{ criteria.value || 1 }} points
+                  </Badge>
+                  <Button variant="ghost" size="sm" @click="handleScanCriteria(criteria.id)" title="Scan QR to award points">
+                    <QrCodeIcon class="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" @click="handleEditCriteria(criteria)" title="Edit criteria">
+                    <PencilIcon class="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" @click="confirmDeleteCriteria(criteria.id)" title="Delete criteria">
+                    <TrashIcon class="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
-            <Button @click="isAddCriteriaOpen = true"
-              ><PlusCircleIcon />Add Criteria</Button
+            <Button 
+              class="w-full flex items-center justify-center mt-4" 
+              variant="outline" 
+              @click="isAddCriteriaOpen = true"
             >
+              <PlusCircleIcon class="h-5 w-5 mr-2" />
+              <span>Add New Evaluation Criteria</span>
+            </Button>
 
             <AddCriteriaSheet
               v-model:open="isAddCriteriaOpen"
               :classId="classDetails.id"
+              :onSuccess="refreshCriterias"
+            />
+
+            <EditCriteriaSheet
+              v-model:open="isEditCriteriaOpen"
+              :classId="classDetails.id"
+              :criteria="selectedCriteria || {}"
               :onSuccess="refreshCriterias"
             />
           </div>
@@ -181,6 +210,7 @@
 
 <script setup lang="ts">
 import AddCriteriaSheet from "@/components/AddCriteriaSheet.vue";
+import EditCriteriaSheet from "@/components/EditCriteriaSheet.vue";
 import PageContainer from "@/components/PageContainer.vue";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -197,6 +227,8 @@ import {
   PlusCircleIcon,
   QrCodeIcon,
   Share2,
+  TrashIcon,
+  PencilIcon,
 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -210,6 +242,8 @@ const currentUserId = ref<string | null>(null);
 const students = ref<any[]>([]);
 const criterias = ref<any[]>([]);
 const isAddCriteriaOpen = ref(false);
+const isEditCriteriaOpen = ref(false);
+const selectedCriteria = ref<Record<string, any> | null>(null);
 
 // Hardcoded tasks (since we don't have a backend for tasks yet)
 const classTasks = ref([
@@ -313,8 +347,33 @@ const handleRemoveCriteria = async (criteriaId: number) => {
   refreshCriterias();
 };
 
-const handleScanCriteria = (criteriaId: number) => {
-  // Handle QR code scanning for criteria
-  console.log("Scan criteria with ID:", criteriaId);
+const handleEditCriteria = (criteria: Record<string, any>) => {
+  selectedCriteria.value = criteria;
+  isEditCriteriaOpen.value = true;
+};
+
+const confirmDeleteCriteria = (criteriaId: number) => {
+  // In a real app, you'd show a confirmation dialog here
+  if (confirm("Are you sure you want to delete this criteria?")) {
+    handleRemoveCriteria(criteriaId);
+  }
+};
+
+const handleScanCriteria = async (criteriaId: number) => {
+  console.log("Scanning criteria with ID:", criteriaId);
+  try {
+    // Implement your QR scanning logic here
+    // This would typically use a plugin like @capacitor/barcode-scanner
+    
+    // After scanning and getting studentId:
+    // await classStore.awardPoints(classDetails.value?.id as number, studentId, criteriaId);
+    
+    // Then refresh the student list
+    if (classDetails.value) {
+      students.value = await classStore.getStudentsInClass(classDetails.value.id);
+    }
+  } catch (error) {
+    console.error("Scanning failed:", error);
+  }
 };
 </script>

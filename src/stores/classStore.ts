@@ -226,6 +226,57 @@ export const useClassStore = defineStore("class", () => {
     }
   }
 
+  async function addCriteriaWithDescription(
+    classId: number,
+    criteriaName: string,
+    description: string | null,
+    value: number
+  ) {
+    try {
+      // First insert the criteria
+      const { data: criteriaData, error: criteriaError } = await supabase
+        .from("criterias")
+        .insert([
+          {
+            name: criteriaName,
+            description: description,
+            value: value,
+          },
+        ])
+        .select()
+        .single();
+
+      if (criteriaError) throw criteriaError;
+      if (!criteriaData) throw new Error("No criteria data returned");
+
+      // Then create the class-criteria relationship
+      const { error: relationError } = await supabase
+        .from("class_criterias")
+        .insert([
+          {
+            class_id: classId,
+            criteria_id: criteriaData.id,
+          },
+        ]);
+
+      if (relationError) throw relationError;
+
+      toast("Success", {
+        description: "Criteria added successfully",
+        position: "top-center",
+      });
+
+      return criteriaData;
+    } catch (error) {
+      console.error("Error adding criteria:", error);
+      toast("Error", {
+        description: "Failed to add criteria",
+        position: "top-center",
+      });
+      throw error;
+    }
+  }
+
   async function getCriterias(classId: number) {
     const { data, error } = await supabase
       .from("class_criterias")
@@ -272,6 +323,21 @@ export const useClassStore = defineStore("class", () => {
       throw error;
     }
   }
+  
+
+  async function updateCriteria(classId: number, criteriaId: number, criteriaData: any) {
+    const { data, error } = await supabase
+      .from('criterias')
+      .update(criteriaData)
+      .eq('id', criteriaId)
+      .eq('class_id', classId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data;
+  }
 
   return {
     classes,
@@ -284,7 +350,9 @@ export const useClassStore = defineStore("class", () => {
     getClassById,
     getStudentsInClass,
     addCriteria,
+    addCriteriaWithDescription,
     getCriterias,
     removeCriteria,
+    updateCriteria,
   };
 });

@@ -206,6 +206,25 @@
       <Button @click="router.back()">Go Back</Button>
     </div>
   </PageContainer>
+
+  <Dialog :open="isDeleteDialogOpen" @update:open="isDeleteDialogOpen = $event">
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>
+          <span class="text-destructive">Delete Criteria</span>
+          </DialogTitle>
+        <DialogDescription>
+          <span class="text-sm text-secondary">
+            Are you sure you want to delete this criteria? This action cannot be undone.
+          </span>
+        </DialogDescription>
+      </DialogHeader>
+      <div class="flex justify-end space-x-2 pt-4">
+        <Button variant="outline" @click="isDeleteDialogOpen = false"><span class="text-secondary">Cancel</span></Button>
+        <Button variant="destructive" @click="confirmDelete"><span class="text-secondary">Delete</span></Button>
+      </div>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -236,6 +255,13 @@ import {
   CapacitorBarcodeScanner,
   CapacitorBarcodeScannerTypeHint,
 } from "@capacitor/barcode-scanner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const route = useRoute();
 const router = useRouter();
@@ -250,6 +276,8 @@ const isEditCriteriaOpen = ref(false);
 const selectedCriteria = ref<Record<string, any> | null>(null);
 const isScanning = ref(false);
 const scanError = ref<string | null>(null);
+const isDeleteDialogOpen = ref(false);
+const criteriaToDelete = ref<number | null>(null);
 
 // Hardcoded tasks (since we don't have a backend for tasks yet)
 const classTasks = ref([
@@ -351,6 +379,24 @@ onMounted(async () => {
 const handleRemoveCriteria = async (criteriaId: number) => {
   await classStore.removeCriteria(classDetails.value?.id as number, criteriaId);
   refreshCriterias();
+};
+
+const confirmDeleteCriteria = (criteriaId: number) => {
+  criteriaToDelete.value = criteriaId;
+  isDeleteDialogOpen.value = true;
+};
+
+const confirmDelete = async () => {
+  if (criteriaToDelete.value) {
+    await handleRemoveCriteria(criteriaToDelete.value);
+    isDeleteDialogOpen.value = false;
+    criteriaToDelete.value = null;
+  }
+};
+
+const handleEditCriteria = (criteria: Record<string, any>) => {
+  selectedCriteria.value = criteria;
+  isEditCriteriaOpen.value = true;
 };
 
 const handleScanCriteria = async (criteriaId: number) => {

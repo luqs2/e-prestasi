@@ -58,7 +58,12 @@
 
           <template v-else>
             <template v-if="joinedClasses.length > 0">
-              <Card v-for="cls in joinedClasses" :key="cls.id">
+              <Card
+                v-for="cls in joinedClasses"
+                :key="cls.id"
+                variant="button"
+                @click="router.push(`/class/details/${cls.id}`)"
+              >
                 <CardContent class="flex items-center p-4">
                   <div class="flex flex-1 flex-col gap-1">
                     <p class="text-xs font-medium">{{ cls.classCode }}</p>

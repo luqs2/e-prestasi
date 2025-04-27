@@ -279,6 +279,7 @@ export const useClassStore = defineStore("class", () => {
     criteriaId: number
   ) {
     try {
+      console.log("testestes", classId, studentId);
       // First check if the student is already in the class
       const { data: studentData, error: studentError } = await supabase
         .from("student_class")
@@ -296,10 +297,11 @@ export const useClassStore = defineStore("class", () => {
         return;
       }
 
+      console.log("critieriaid", criteriaId);
       //Get the criteria value
       const { data: criteriaData, error: criteriaError } = await supabase
         .from("criterias")
-        .select("value")
+        .select("*")
         .eq("id", criteriaId)
         .single();
 
@@ -313,17 +315,18 @@ export const useClassStore = defineStore("class", () => {
       }
 
       // Then award points to the student
-      const { error: pointsError } = await supabase
+      const { data: pointsData, error: pointsError } = await supabase
         .from("student_class")
         .update({
           points: studentData.points + parseInt(criteriaData.value),
-          history: [
-            ...studentData.history,
-            `${studentData.points} + ${criteriaData.value}`,
+          pointsHistory: [
+            ...(studentData.pointsHistory || []),
+            `${criteriaData.name} + ${criteriaData.value}`,
           ],
         })
         .eq("class_id", classId)
         .eq("user_id", studentId);
+      console.log("tests", pointsData);
 
       if (pointsError) throw pointsError;
 
@@ -332,7 +335,7 @@ export const useClassStore = defineStore("class", () => {
         position: "top-center",
       });
     } catch (error) {
-      console.error("Error awarding points:", error);
+      console.error("Error awarding points:", JSON.stringify(error));
       toast("Error", {
         description: "Failed to award points",
         position: "top-center",

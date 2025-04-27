@@ -336,11 +336,19 @@ const handleScanCriteria = async (criteriaId: number) => {
       // Handle the scanned QR code content here
       // You might want to validate the content or process it further
 
-      await classStore.awardPoints(
-        classDetails.value?.id as number,
-        result.ScanResult,
-        criteriaId
-      );
+      //After scanning, get userid from the scanned QR code and award points
+      const res = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("qr_id", result.ScanResult)
+        .single();
+
+      if (res.data)
+        await classStore.awardPoints(
+          classDetails.value?.id as number,
+          res.data.user_id,
+          criteriaId
+        );
 
       // Refresh the student list after updating points
       if (classDetails.value) {

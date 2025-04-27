@@ -232,6 +232,10 @@ import {
 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
+} from "@capacitor/barcode-scanner";
 
 const route = useRoute();
 const router = useRouter();
@@ -244,6 +248,8 @@ const criterias = ref<any[]>([]);
 const isAddCriteriaOpen = ref(false);
 const isEditCriteriaOpen = ref(false);
 const selectedCriteria = ref<Record<string, any> | null>(null);
+const isScanning = ref(false);
+const scanError = ref<string | null>(null);
 
 // Hardcoded tasks (since we don't have a backend for tasks yet)
 const classTasks = ref([
@@ -347,33 +353,52 @@ const handleRemoveCriteria = async (criteriaId: number) => {
   refreshCriterias();
 };
 
-const handleEditCriteria = (criteria: Record<string, any>) => {
-  selectedCriteria.value = criteria;
-  isEditCriteriaOpen.value = true;
-};
-
-const confirmDeleteCriteria = (criteriaId: number) => {
-  // In a real app, you'd show a confirmation dialog here
-  if (confirm("Are you sure you want to delete this criteria?")) {
-    handleRemoveCriteria(criteriaId);
-  }
-};
-
 const handleScanCriteria = async (criteriaId: number) => {
   console.log("Scanning criteria with ID:", criteriaId);
   try {
-    // Implement your QR scanning logic here
-    // This would typically use a plugin like @capacitor/barcode-scanner
-    
-    // After scanning and getting studentId:
-    // await classStore.awardPoints(classDetails.value?.id as number, studentId, criteriaId);
-    
-    // Then refresh the student list
-    if (classDetails.value) {
-      students.value = await classStore.getStudentsInClass(classDetails.value.id);
+    // Prepare UI for scanning
+    isScanning.value = true;
+    document.querySelector("body")?.classList.add("scanner-active");
+
+    // Start scanning
+    const result = await CapacitorBarcodeScanner.scanBarcode({
+      hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+    });
+
+    if (result.ScanResult) {
+      console.log("Scanned content:", result.ScanResult);
+      // Handle the scanned QR code content here
+      // You might want to validate the content or process it further
+
+      //After scanning, get userid from the scanned QR code and award points
+      const res = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("qr_id", result.ScanResult)
+        .single();
+
+      if (res.data)
+        await classStore.awardPoints(
+          classDetails.value?.id as number,
+          res.data.user_id,
+          criteriaId
+        );
+
+      // Refresh the student list after updating points
+      if (classDetails.value) {
+        students.value = await classStore.getStudentsInClass(
+          classDetails.value.id
+        );
+      }
     }
   } catch (error) {
     console.error("Scanning failed:", error);
+    scanError.value =
+      error instanceof Error ? error.message : "Failed to scan QR code";
+  } finally {
+    // Cleanup
+    isScanning.value = false;
+    document.querySelector("body")?.classList.remove("scanner-active");
   }
 };
 </script>

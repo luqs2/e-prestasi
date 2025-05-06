@@ -20,17 +20,6 @@ import "@ionic/vue/css/core.css";
 // import "@ionic/vue/css/flex-utils.css";
 // import "@ionic/vue/css/display.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import '@ionic/vue/css/palettes/dark.always.css'; */
-/* @import '@ionic/vue/css/palettes/dark.class.css'; */
-// import "@ionic/vue/css/palettes/dark.system.css";
-
 /* Theme variables */
 import "./theme/variables.css";
 import "./tailwind.css";
@@ -38,6 +27,12 @@ import { createPinia } from "pinia";
 
 const pinia = createPinia();
 const app = createApp(App).use(pinia).use(IonicVue).use(router);
+
+// Force Ionic to use light mode
+app.config.globalProperties.$ionic = {
+  mode: 'ios',
+  dark: false
+};
 
 router.isReady().then(() => {
   app.mount("#app");

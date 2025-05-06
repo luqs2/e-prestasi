@@ -1,52 +1,56 @@
 <template>
-  <BottomSheet v-model:open="model">
-    <form @submit="onSubmit" class="flex flex-col gap-4">
-      <FormField v-slot="{ componentField }" name="criteriaName">
-        <FormItem>
-          <FormLabel>Criteria Name</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              placeholder="Enter criteria name"
-              v-bind="componentField"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+  <Dialog v-model:open="model">
+    <DialogContent class="bg-white text-black">
+      <form @submit="onSubmit" class="flex flex-col gap-4">
+        <FormField v-slot="{ componentField }" name="criteriaName">
+          <FormItem>
+            <FormLabel>Criteria Name</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Enter criteria name"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-      <FormField v-slot="{ componentField }" name="description">
-        <FormItem>
-          <FormLabel>Description (Optional)</FormLabel>
-          <FormControl>
-            <Input
-              type="text"
-              placeholder="Enter description"
-              v-bind="componentField"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+        <FormField v-slot="{ componentField }" name="description">
+          <FormItem>
+            <FormLabel>Description (Optional)</FormLabel>
+            <FormControl>
+              <Input
+                type="text"
+                placeholder="Enter description"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-      <FormField v-slot="{ componentField }" name="value">
-        <FormItem>
-          <FormLabel>Value</FormLabel>
-          <FormControl>
-            <Input
-              type="number"
-              min="1"
-              placeholder="Enter value"
-              v-bind="componentField"
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+        <FormField v-slot="{ componentField }" name="value">
+          <FormItem>
+            <FormLabel>Value</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min="1"
+                placeholder="Enter value"
+                v-bind="componentField"
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-      <Button type="submit" :loading="isLoading">Add Criteria</Button>
-    </form>
-  </BottomSheet>
+        <DialogFooter>
+          <Button type="submit" :loading="isLoading">Add Criteria</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -62,7 +66,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { ref } from "vue";
 import { z } from "zod";
-import BottomSheet from "./BottomSheet.vue";
+import { Dialog, DialogContent, DialogFooter } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 

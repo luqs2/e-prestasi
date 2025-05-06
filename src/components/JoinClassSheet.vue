@@ -1,19 +1,30 @@
 <template>
-  <BottomSheet v-model:open="model">
-    <form @submit="onSubmit" class="flex flex-col gap-4">
-      <FormField v-slot="{ componentField }" name="classID">
-        <FormItem>
-          <FormLabel>Class ID</FormLabel>
-          <FormControl>
-            <Input type="text" placeholder="Class ID" v-bind="componentField" />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      </FormField>
+  <Dialog v-model:open="model">
+    <DialogContent class="bg-white text-black">
+      <DialogHeader>
+        <DialogTitle>Join Class</DialogTitle>
+        <DialogDescription>
+          Enter a class ID to join an existing class.
+        </DialogDescription>
+      </DialogHeader>
+      
+      <form @submit="onSubmit" class="flex flex-col gap-4">
+        <FormField v-slot="{ componentField }" name="classID">
+          <FormItem>
+            <FormLabel>Class ID</FormLabel>
+            <FormControl>
+              <Input type="text" placeholder="Class ID" v-bind="componentField" />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        </FormField>
 
-      <Button type="submit" :loading="isLoading">Join Class</Button>
-    </form>
-  </BottomSheet>
+        <DialogFooter>
+          <Button type="submit" :loading="isLoading">Join Class</Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -29,7 +40,7 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { ref } from "vue";
 import { z } from "zod";
-import BottomSheet from "./BottomSheet.vue";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 

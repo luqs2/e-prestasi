@@ -3,8 +3,8 @@
     <div class="flex flex-col gap-4">
       <!-- Greetings -->
       <div>
-        <p class="text-xs font-light">Good morning</p>
-        <p class="text-sm font-bold">Ahmad bin Abu</p>
+        <p class="text-xs font-light">{{ greeting }}</p>
+        <p class="text-sm font-bold">{{ user?.firstName || 'User' }}</p>
       </div>
 
       <!-- Card Progress-->
@@ -48,30 +48,24 @@
       </Card>
 
       <!-- Todays Schedule -->
-      <p class="text-sm font-bold">Today's Schedule</p>
-      <div class="flex gap-4">
-        <Card class="flex flex-1"
-          ><CardContent class="flex flex-col gap-4 p-4">
-            <img src="" class="size-24" />
+      <div v-if="todayClasses.length > 0">
+        <p class="text-sm font-bold">Today's Schedule</p>
+        <div class="flex gap-4">
+          <Card v-for="(classItem, index) in todayClasses" :key="index" class="flex flex-1">
+            <CardContent class="flex flex-col gap-4 p-4">
+              <img src="" class="size-24" />
 
-            <div class="flex flex-1 flex-col gap-1">
-              <p class="text-xs font-medium">DES 3073</p>
-              <p class="text-sm font-bold">UI/UX Design</p>
-              <p class="text-xs font-light">10:00am - 12:00pm</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card class="flex flex-1"
-          ><CardContent class="flex flex-col gap-4 p-4">
-            <img src="" class="size-24" />
-
-            <div class="flex flex-1 flex-col gap-1">
-              <p class="text-xs font-medium">DES 3073</p>
-              <p class="text-sm font-bold">UI/UX Design</p>
-              <p class="text-xs font-light">10:00am - 12:00pm</p>
-            </div>
-          </CardContent>
-        </Card>
+              <div class="flex flex-1 flex-col gap-1">
+                <p class="text-xs font-medium">{{ classItem.classCode }}</p>
+                <p class="text-sm font-bold">{{ classItem.className }}</p>
+                <p class="text-xs font-light">{{ classItem.timeFrom }} - {{ classItem.timeTo }}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+      <div v-else class="text-center py-4">
+        <p class="text-sm font-medium text-black">No classes today</p>
       </div>
 
       <!-- Buttons -->
@@ -92,24 +86,46 @@
 </template>
 
 <script setup lang="ts">
+import { computed, ref, onMounted } from 'vue'
 import PageContainer from "@/components/PageContainer.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { EyeIcon, PlusCircleIcon, QrCodeIcon } from "lucide-vue-next";
-import { ProgressIndicator, ProgressRoot } from "reka-ui";
-import { computed, onMounted, ref } from "vue";
+import { ProgressRoot, ProgressIndicator } from "reka-ui";
 import { QrcodeSvg } from "qrcode.vue";
 import { useAuthStore } from "@/stores/authStore";
+import { useClassStore } from "@/stores/classStore";
 import { storeToRefs } from "pinia";
+import { EyeIcon, PlusCircleIcon, QrCodeIcon } from "lucide-vue-next";
+
+const progress = ref(85)
+const greeting = computed(() => {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 12) return 'Good morning'
+  if (hour >= 12 && hour < 18) return 'Good afternoon'
+  if (hour >= 18 && hour < 22) return 'Good evening'
+  return 'Good night'
+})
 
 const RADIUS = 45;
 const circumference = 2 * Math.PI * RADIUS;
-
-const progress = ref(0);
 const showQRCode = ref(false);
 const authStore = useAuthStore();
+const classStore = useClassStore();
 const { user } = storeToRefs(authStore);
-console.log(user.value);
+const { joinedClasses } = storeToRefs(classStore);
+
+// Get today's day (0 = Sunday, 1 = Monday, etc.)
+const today = computed(() => {
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[new Date().getDay()];
+});
+
+// Filter classes for today
+const todayClasses = computed(() => {
+  return joinedClasses.value.filter((classItem) => classItem.day === today.value);
+});
+
+
 
 const dashOffset = computed(() => (progress.value / 100) * circumference);
 
@@ -131,6 +147,11 @@ onMounted(() => {
       progress.value = 0;
     }
   }, 1000);
+});
+
+// Fetch classes when component mounts
+onMounted(() => {
+  classStore.getJoinedClasses();
 });
 </script>
 

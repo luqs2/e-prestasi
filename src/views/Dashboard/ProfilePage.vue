@@ -10,8 +10,8 @@
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <div class="flex flex-col justify-center">
-            <p class="text-sm font-bold">Ahmad bin Abu</p>
-            <p class="text-xs font-light">ahmadhensem@gmail.com</p>
+            <p class="text-sm font-bold">{{ user?.firstName }} {{ user?.lastName }}</p>
+            <p class="text-xs font-light">{{ user?.email }}</p>
           </div>
         </div>
       </div>
@@ -125,6 +125,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuthStore } from "@/stores/authStore";
+import { storeToRefs } from "pinia";
 import {
   ChevronRightIcon,
   MoonIcon,
@@ -138,6 +139,7 @@ const isDarkMode = ref(false);
 const isNotificationsOn = ref(false);
 const language = ref("english");
 const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 const isLoading = ref(false);
 
 // Initialize dark mode based on stored preference or system preference

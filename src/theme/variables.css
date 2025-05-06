@@ -2,6 +2,9 @@
 http://ionicframework.com/docs/theming/ */
 
 :root {
-    --primary: 46 89% 63%;
-    --secondary: 60 1% 15%;
+    --color-primary: hsl(46 89% 63%);
+    --color-secondary: hsl(60 1% 15%);
+    --color-background: hsl(0 0% 100%);
+    --color-muted: hsl(0 0% 90%);
+    --color-destructive: hsl(0 75% 50%);
 }

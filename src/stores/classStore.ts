@@ -38,6 +38,7 @@ export const useClassStore = defineStore("class", () => {
           timeTo,
           classGroup,
           user_id,
+          class_img,
           created_at)
       `
       )
@@ -54,15 +55,69 @@ export const useClassStore = defineStore("class", () => {
     }
   }
 
+  async function uploadClassImage(imageUrl: string, classId?: number) {
+    try {
+      // Fetch the image from Pixabay
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      
+      // Generate a unique file name
+      const fileExt = 'jpg'; // Most Pixabay images are JPGs
+      const fileName = `class-${Date.now()}.${fileExt}`;
+      const filePath = `class-images/${fileName}`;
+      
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('eprestasiimage')
+        .upload(filePath, blob);
+        
+      if (uploadError) {
+        console.error('Error uploading class image:', uploadError.message);
+        return null;
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('eprestasiimage')
+        .getPublicUrl(filePath);
+      
+      // If classId is provided, update the class with the new image
+      if (classId) {
+        const { error: updateError } = await supabase
+          .from('classes')
+          .update({ class_img: publicUrl })
+          .eq('id', classId);
+          
+        if (updateError) {
+          console.error('Error updating class with image:', updateError.message);
+          return null;
+        }
+      }
+      
+      return publicUrl;
+    } catch (error) {
+      console.error('Error in uploadClassImage:', error);
+      return null;
+    }
+  }
+
   async function createClass(
     classCode: string,
     className: string,
     day: string,
     timeFrom: string,
     timeTo: string,
-    classGroup: string
+    classGroup: string,
+    classImageUrl?: string // Add this parameter
   ) {
     const userId = (await supabase.auth.getSession()).data.session?.user.id;
+    
+    // First upload the image if provided
+    let storageImageUrl = null;
+    if (classImageUrl) {
+      storageImageUrl = await uploadClassImage(classImageUrl);
+    }
+    
     const { data, error } = await supabase
       .from("classes")
       .insert([
@@ -73,6 +128,7 @@ export const useClassStore = defineStore("class", () => {
           timeFrom: timeFrom,
           timeTo: timeTo,
           classGroup: classGroup,
+          class_img: storageImageUrl, // Add this field
           user_id: userId,
         },
       ])
@@ -92,51 +148,61 @@ export const useClassStore = defineStore("class", () => {
   }
 
   async function joinClass(classId: string) {
-    const userId = (await supabase.auth.getSession()).data.session?.user.id;
+    try {
+      // Get the current user's ID
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user.id;
+      
+      if (!userId) {
+        console.error("No authenticated user found");
+        toast.error("You must be signed in to join a class");
+        return false;
+      }
+      
+      // Check if the student is already in the class - MODIFIED HERE
+      const { data: existingEnrollments, error: checkError } = await supabase
+        .from("student_class")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("class_id", classId);
+      
+      console.log("Checking enrollment:", { userId, classId });
+      console.log("Enrollment check result:", existingEnrollments);
 
-    // First check if this is the user's own class
-    const { data: classData, error: classError } = await supabase
-      .from("classes")
-      .select("user_id")
-      .eq("id", classId)
-      .single();
-
-    if (classError) {
-      toast("Error", {
-        description: "Cannot find class",
-        position: "top-center",
-      });
-      console.error("Error checking class:", classError.message);
-      return;
-    }
-
-    if (classData.user_id === userId) {
-      toast("Error", {
-        description: "You cannot join your own class",
-        position: "top-center",
-      });
-      console.error("Cannot join your own class");
-      return;
-    }
-
-    // If not the owner, proceed with joining
-    const { data, error } = await supabase.from("student_class").insert([
-      {
-        class_id: classId,
-        user_id: userId,
-      },
-    ]);
-
-    if (error) {
-      console.error("Error joining class:", error.message);
-      throw error;
-    } else {
-      console.log("Joined class successfully:", data);
-      toast("Success", {
-        description: "Class joined successfully",
-        position: "top-center",
-      });
-      await getJoinedClasses();
+      if (checkError) {
+        console.error("Error checking class enrollment:", checkError.message);
+        toast.error("Failed to join class. Please try again.");
+        return false;
+      }
+      
+      // If student is already enrolled, show an error message
+      if (existingEnrollments && existingEnrollments.length > 0) {
+        toast.error("You have already joined this class");
+        return false;
+      }
+      
+      // If not enrolled, proceed with joining the class
+      const { error } = await supabase.from("student_class").insert([
+        {
+          user_id: userId, 
+          class_id: classId,
+          points: 0
+        },
+      ]);
+  
+      if (error) {
+        console.error("Error joining class:", error.message);
+        toast.error("Failed to join class. Please try again.");
+        return false;
+      }
+  
+      toast.success("Successfully joined class");
+      await getJoinedClasses(); // Refresh the list of joined classes
+      return true;
+    } catch (error) {
+      console.error("Error in joinClass function:", error);
+      toast.error("An error occurred. Please try again.");
+      return false;
     }
   }
 
@@ -410,9 +476,195 @@ export const useClassStore = defineStore("class", () => {
     }
   }
 
+  async function deleteClass(classId: number) {
+    try {
+      // Get current user to verify ownership
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user.id;
+      
+      if (!userId) {
+        console.error("No authenticated user found");
+        return false;
+      }
+      
+      // Verify class ownership before deletion
+      const { data: classData } = await supabase
+        .from('classes')
+        .select('user_id')
+        .eq('id', classId)
+        .single();
+      
+      if (!classData || classData.user_id !== userId) {
+        console.error("Not authorized to delete this class");
+        return false;
+      }
+      
+      // Delete all related records first (to avoid foreign key constraints)
+      
+      // 1. Delete student_class entries
+      await supabase
+        .from('student_class')
+        .delete()
+        .eq('class_id', classId);
+      
+      // 2. Delete criteria_class entries
+      await supabase
+        .from('criteria_class')
+        .delete()
+        .eq('class_id', classId);
+      
+      // 3. Delete class_criterias entries
+      await supabase
+        .from('criterias')
+        .delete()
+        .eq('class_id', classId);
+      
+      // 4. Finally delete the class itself
+      const { error } = await supabase
+        .from('classes')
+        .delete()
+        .eq('id', classId);
+      
+      if (error) {
+        console.error("Error deleting class:", error.message);
+        return false;
+      }
+      
+      // Refresh the classes list
+      await getClasses();
+      return true;
+    } catch (error) {
+      console.error("Error in deleteClass function:", error);
+      return false;
+    }
+  }
+
+  async function leaveClass(classId: number) {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user.id;
+      
+      if (!userId) {
+        console.error("No authenticated user found");
+        return false;
+      }
+      
+      const { error } = await supabase
+        .from('student_class')
+        .delete()
+        .eq('user_id', userId)  
+        .eq('class_id', classId);
+      
+      if (error) {
+        console.error("Error leaving class:", error.message);
+        return false;
+      }
+      
+      // Refresh joined classes
+      await getJoinedClasses();
+      return true;
+    } catch (error) {
+      console.error("Error in leaveClass function:", error);
+      return false;
+    }
+  }
+
+  async function getStudentCount(classId: number) {
+    const { count, error } = await supabase
+      .from('student_class')
+      .select('*', { count: 'exact', head: true })
+      .eq('class_id', classId);
+
+    if (error) {
+      console.error('Error fetching student count:', error.message);
+      return 0;
+    }
+    return count || 0;
+  }
+
+async function getStudentCriterias(classId: number) {
+  const userId = (await supabase.auth.getSession()).data.session?.user.id;
+  
+  // First get the criteria for this class
+  const { data: criteriaData, error: criteriaError } = await supabase
+    .from("criterias")
+    .select("*")
+    .eq("class_id", classId);
+    
+  if (criteriaError) {
+    console.error("Error fetching criteria:", criteriaError.message);
+    return [];
+  }
+  
+  // Then get the student's awarded points for each criteria
+  const { data: pointsData, error: pointsError } = await supabase
+    .from("student_points")
+    .select("*")
+    .eq("class_id", classId)
+    .eq("user_id", userId);
+    
+  if (pointsError) {
+    console.error("Error fetching student points:", pointsError.message);
+    return [];
+  }
+  
+  // Combine the data to show each criteria with points awarded
+  return criteriaData.map(criteria => {
+    // Find awarded points for this criteria (if any)
+    const pointsEntry = pointsData.find(p => p.criteria_id === criteria.id);
+    return {
+      id: criteria.id,
+      name: criteria.name,
+      value: criteria.value,
+      points_awarded: pointsEntry ? pointsEntry.points : 0
+    };
+  });
+} 
+
+async function getAllClassCriterias(classId: number) {
+  // Get all criteria for this class
+  const { data: criteriaData, error: criteriaError } = await supabase
+    .from("criterias")
+    .select("*")
+    .eq("class_id", classId);
+    
+  if (criteriaError) {
+    console.error("Error fetching criteria:", criteriaError.message);
+    return [];
+  }
+  
+  // Get all points awarded for all students
+  const { data: pointsData, error: pointsError } = await supabase
+    .from("student_points")
+    .select("*")
+    .eq("class_id", classId);
+    
+  if (pointsError) {
+    console.error("Error fetching student points:", pointsError.message);
+    return [];
+  }
+  
+  // Combine the data to show each criteria with total points awarded across all students
+  return criteriaData.map(criteria => {
+    // Find all points entries for this criteria
+    const criteriaPoints = pointsData.filter(p => p.criteria_id === criteria.id);
+    const totalPointsAwarded = criteriaPoints.reduce((sum, point) => sum + point.points, 0);
+    
+    return {
+      id: criteria.id,
+      name: criteria.name,
+      value: criteria.value,
+      points_awarded: totalPointsAwarded,
+      students_awarded: criteriaPoints.length
+    };
+  });
+}
+
   return {
     classes,
     joinedClasses,
+    getStudentCount,
+
 
     getClasses,
     getJoinedClasses,
@@ -426,5 +678,10 @@ export const useClassStore = defineStore("class", () => {
     removeCriteria,
     updateCriteria,
     awardPoints,
+    uploadClassImage,
+    deleteClass,
+    leaveClass,
+    getStudentCriterias,
+    getAllClassCriterias,
   };
 });

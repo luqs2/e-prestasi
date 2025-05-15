@@ -8,4 +8,5 @@ interface Class {
   user_id: string;
   created_at: string;
   classGroup: string;
+  class_img?: string;
 }

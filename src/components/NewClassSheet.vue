@@ -1,6 +1,6 @@
 <template>
   <Dialog v-model:open="model">
-    <DialogContent class="bg-white text-black">
+    <DialogContent class="bg-white text-black max-w-lg">
       <DialogHeader>
         <DialogTitle>Create New Class</DialogTitle>
         <DialogDescription>
@@ -158,7 +158,6 @@ const { handleSubmit } = useForm({
 
 const onSubmit = handleSubmit(async (values) => {
   isLoading.value = true;
-  console.log(values);
 
   await classStore
     .createClass(

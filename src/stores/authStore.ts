@@ -32,10 +32,7 @@ export const useAuthStore = defineStore("auth", () => {
         refresh_token: data.session.refresh_token,
       });
       await getUser();
-      toast("Success", {
-        description: "Logged in successfully",
-        position: "top-center",
-      });
+      toast.success("Logged in successfully");
       router.push("/home");
     }
   }
@@ -60,7 +57,7 @@ export const useAuthStore = defineStore("auth", () => {
         const seed = Math.random().toString(36).substring(2, 10);
         const style = "pixel-art-neutral"; // You can use other styles: bottts, pixel-art, lorelei, etc.
         const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}`;
-        
+
         supabase
           .from("profiles")
           .insert([
@@ -81,11 +78,7 @@ export const useAuthStore = defineStore("auth", () => {
           });
       }
 
-      toast("Success", {
-        description: "Signed up successfully",
-        position: "top-center",
-      });
-
+      toast.success("Signed up successfully");
       router.push("/login");
     }
   }
@@ -103,22 +96,22 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function updateAvatar(avatarUrl: string) {
     const { data } = await supabase.auth.getSession();
-    
+
     if (!data.session?.user.id) {
       console.error("No authenticated user found");
       return false;
     }
-    
+
     const { error } = await supabase
       .from("profiles")
       .update({ user_avatar: avatarUrl })
       .eq("user_id", data.session.user.id);
-      
+
     if (error) {
       console.error("Error updating avatar:", error.message);
       return false;
     }
-    
+
     // Update the local user data
     await getUser();
     return true;
@@ -128,49 +121,49 @@ export const useAuthStore = defineStore("auth", () => {
     // Check if user is authenticated
     const { data: sessionData } = await supabase.auth.getSession();
     const userId = sessionData.session?.user.id;
-    
+
     if (!userId || !file) {
       console.error("No authenticated user found or no file provided");
       return false;
     }
-    
+
     try {
       // Process file for upload
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split(".").pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
-      
+
       // Upload file to Supabase storage
       const { error: uploadError } = await supabase.storage
-        .from('eprestasiimage')
+        .from("eprestasiimage")
         .upload(filePath, file);
-        
+
       if (uploadError) {
-        console.error('Error uploading file:', uploadError.message);
+        console.error("Error uploading file:", uploadError.message);
         return false;
       }
-      
+
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('eprestasiimage')
-        .getPublicUrl(filePath);
-        
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("eprestasiimage").getPublicUrl(filePath);
+
       // Update user profile with new avatar URL
       const { error: updateError } = await supabase
-        .from('profiles')
+        .from("profiles")
         .update({ user_avatar: publicUrl })
-        .eq('user_id', userId);
-        
+        .eq("user_id", userId);
+
       if (updateError) {
-        console.error('Error updating profile:', updateError.message);
+        console.error("Error updating profile:", updateError.message);
         return false;
       }
-      
+
       // Update local user data
       await getUser();
       return true;
     } catch (error) {
-      console.error('Error uploading avatar:', error);
+      console.error("Error uploading avatar:", error);
       return false;
     }
   }
@@ -178,29 +171,32 @@ export const useAuthStore = defineStore("auth", () => {
   async function updateAvatarFromUrl(url: string) {
     const { data: sessionData } = await supabase.auth.getSession();
     const userId = sessionData.session?.user.id;
-    
+
     if (!userId) {
       console.error("No authenticated user found");
       return false;
     }
-    
+
     try {
       // Update user profile directly with the DiceBear URL
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ user_avatar: url })
         .eq("user_id", userId);
-        
+
       if (updateError) {
-        console.error('Error updating profile with DiceBear avatar:', updateError.message);
+        console.error(
+          "Error updating profile with DiceBear avatar:",
+          updateError.message
+        );
         return false;
       }
-      
+
       // Update local user data
       await getUser();
       return true;
     } catch (error) {
-      console.error('Error setting DiceBear avatar:', error);
+      console.error("Error setting DiceBear avatar:", error);
       return false;
     }
   }

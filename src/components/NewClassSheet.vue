@@ -42,10 +42,10 @@
             <FormLabel>Day</FormLabel>
             <FormControl>
               <Select v-bind="componentField">
-                <SelectTrigger class="w-full bg-muted">
+                <SelectTrigger class="w-full bg-white">
                   <SelectValue placeholder="Select a day" />
                 </SelectTrigger>
-                <SelectContent class="bg-muted text-black">
+                <SelectContent class="bg-white text-black">
                   <SelectGroup>
                     <SelectItem value="monday"> Monday </SelectItem>
                     <SelectItem value="tuesday"> Tuesday </SelectItem>
@@ -94,11 +94,7 @@
           <FormItem>
             <FormLabel>Group</FormLabel>
             <FormControl>
-              <Input
-                type="text"
-                placeholder="A"
-                v-bind="componentField"
-              />
+              <Input type="text" placeholder="A" v-bind="componentField" />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -132,7 +128,14 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useForm } from "vee-validate";
 import { ref } from "vue";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select } from "./ui/select";

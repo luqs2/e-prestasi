@@ -13,8 +13,8 @@
           </div>
 
           <template v-else>
-            <template v-if="myClasses.length > 0">
-              <Card v-for="cls in myClasses" :key="cls.id" variant="button">
+            <template v-if="classes.length > 0">
+              <Card v-for="cls in classes" :key="cls.id" variant="button">
                 <CardContent class="flex flex-col gap-4">
                   <div class="flex items-center">
                     <div class="flex flex-1 flex-col gap-1">
@@ -38,18 +38,23 @@
                     <CardContent class="text-primary flex flex-col gap-2">
                       <p class="text-sm">Criteria and Points</p>
 
-                      <div v-if="classCriterias[cls.id] && classCriterias[cls.id].length > 0" 
-                           :class="{
-                             'grid gap-4': true,
-                             'grid-cols-1': classCriterias[cls.id].length === 1,
-                             'grid-cols-2': classCriterias[cls.id].length >= 2,
-                             'grid-rows-1': classCriterias[cls.id].length <= 2,
-                             'grid-rows-2': classCriterias[cls.id].length > 2
-                           }">
-                        <Card 
-                          v-for="(criteria) in classCriterias[cls.id].slice(0, 4)" 
-                          :key="criteria.id" 
-                          variant="outline" 
+                      <div
+                        v-if="
+                          classCriterias[cls.id] &&
+                          classCriterias[cls.id].length > 0
+                        "
+                        :class="{
+                          'grid gap-4': true,
+                          'grid-cols-1': classCriterias[cls.id].length === 1,
+                          'grid-cols-2': classCriterias[cls.id].length >= 2,
+                          'grid-rows-1': classCriterias[cls.id].length <= 2,
+                          'grid-rows-2': classCriterias[cls.id].length > 2,
+                        }"
+                      >
+                        <Card
+                          v-for="criteria in classCriterias[cls.id].slice(0, 4)"
+                          :key="criteria.id"
+                          variant="outline"
                           class="p-0"
                         >
                           <CardContent class="p-2">
@@ -59,7 +64,9 @@
                         </Card>
                       </div>
                       <div v-else class="py-3 text-center">
-                        <p class="text-sm font-medium text-amber-300">No criteria in this class</p>
+                        <p class="text-sm font-medium text-amber-300">
+                          No criteria in this class
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -88,8 +95,8 @@
           </div>
 
           <template v-else>
-            <template v-if="joinedClassesData.length > 0">
-              <Card v-for="cls in joinedClassesData" :key="cls.id" variant="button">
+            <template v-if="joinedClasses.length > 0">
+              <Card v-for="cls in joinedClasses" :key="cls.id" variant="button">
                 <CardContent class="flex flex-col gap-4">
                   <div class="flex items-center">
                     <div class="flex flex-1 flex-col gap-1">
@@ -112,30 +119,11 @@
                   <Card variant="dark">
                     <CardContent class="text-primary flex flex-col gap-2">
                       <p class="text-sm">My Points</p>
-
-                      <div v-if="studentCriterias[cls.id] && studentCriterias[cls.id].length > 0" 
-                           :class="{
-                             'grid gap-4': true,
-                             'grid-cols-1': studentCriterias[cls.id].length === 1,
-                             'grid-cols-2': studentCriterias[cls.id].length >= 2,
-                             'grid-rows-1': studentCriterias[cls.id].length <= 2,
-                             'grid-rows-2': studentCriterias[cls.id].length > 2
-                           }">
-                        <Card 
-                          v-for="(criteria) in studentCriterias[cls.id].slice(0, 4)" 
-                          :key="criteria.id" 
-                          variant="outline" 
-                          class="p-0"
-                        >
-                          <CardContent class="p-2">
-                            <p>{{ criteria.name }}</p>
-                            <p class="text-2xl">{{ criteria.points_awarded || 0 }} pts</p>
-                          </CardContent>
-                        </Card>
-                      </div>
-                      <div v-else class="py-3 text-center">
-                        <p class="text-sm font-medium text-amber-300">No points awarded yet</p>
-                      </div>
+                      <Card variant="outline" class="p-0">
+                        <CardContent class="p-2">
+                          <p class="text-2xl">{{ cls.points || 0 }} pts</p>
+                        </CardContent>
+                      </Card>
                     </CardContent>
                   </Card>
 
@@ -161,24 +149,21 @@
 
 <script setup lang="ts">
 import PageContainer from "@/components/PageContainer.vue";
-import {  Avatar } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "vue-router";
-import { IonSpinner } from "@ionic/vue";
-import { ref, onMounted } from "vue";
 import { useClassStore } from "@/stores/classStore";
+import { IonSpinner } from "@ionic/vue";
 import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const classStore = useClassStore();
 const { classes, joinedClasses } = storeToRefs(classStore);
-const myClasses = ref<any[]>([]);
-const joinedClassesData = ref<any[]>([]);
 const isLoading = ref(true);
-const classCriterias = ref<{[key: number]: any[]}>({});
-const studentCriterias = ref<{[key: number]: any[]}>({});
+const classCriterias = ref<{ [key: number]: any[] }>({});
 
 function getClassInitials(className: string) {
   return className
@@ -191,39 +176,6 @@ onMounted(async () => {
   try {
     await classStore.getClasses();
     await classStore.getJoinedClasses();
-
-    // Map classes to the format expected by the report view
-    myClasses.value = classes.value.map((cls) => ({
-      ...cls,
-      // Performance data would be added here in a real implementation
-    }));
-
-    joinedClassesData.value = joinedClasses.value.map((cls) => ({
-      ...cls,
-      // Performance data would be added here in a real implementation
-    }));
-
-    // Fetch criteria for each class
-    for (const cls of myClasses.value) {
-      try {
-        const criteria = await classStore.getCriterias(cls.id);
-        classCriterias.value[cls.id] = criteria;
-      } catch (error) {
-        console.error(`Error fetching criteria for class ${cls.id}:`, error);
-        classCriterias.value[cls.id] = [];
-      }
-    }
-
-    // Fetch student criteria for each joined class
-    for (const cls of joinedClassesData.value) {
-      try {
-        const criteria = await classStore.getStudentCriterias(cls.id);
-        studentCriterias.value[cls.id] = criteria;
-      } catch (error) {
-        console.error(`Error fetching student criteria for class ${cls.id}:`, error);
-        studentCriterias.value[cls.id] = [];
-      }
-    }
   } catch (error) {
     console.error("Error fetching classes:", error);
   } finally {

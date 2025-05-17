@@ -10,3 +10,8 @@ interface Class {
   classGroup: string;
   class_img?: string;
 }
+
+interface ClassWithPoints extends Class {
+  points: number;
+  pointsHistory: number[];
+}

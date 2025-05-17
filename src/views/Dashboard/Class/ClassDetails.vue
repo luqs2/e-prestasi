@@ -54,7 +54,7 @@
                   </Button>
                   <span class="text-xs text-primary">Share Class</span>
                 </div>
-                
+
                 <!-- Add Image Button -->
                 <div
                   class="flex flex-col items-center gap-2 cursor-pointer"
@@ -68,20 +68,20 @@
               </div>
             </CardContent>
           </Card>
-          
+
           <!-- Class Background Image (if available) -->
           <Card v-if="classDetails.class_img" class="mt-4 overflow-hidden">
             <CardContent class="p-0">
               <div class="relative">
-                <img 
-                  :src="classDetails.class_img" 
-                  :alt="classDetails.className" 
-                  class="w-full aspect-video object-cover" 
+                <img
+                  :src="classDetails.class_img"
+                  :alt="classDetails.className"
+                  class="w-full aspect-video object-cover"
                 />
-                <Button 
-                  variant="secondary" 
-                  size="sm" 
-                  class="absolute top-2 right-2 opacity-90"
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  class="absolute top-2 right-2 opacity-90 bg-white"
                   @click="isImageSelectorOpen = true"
                 >
                   <PencilIcon class="h-4 w-4 mr-1" /> Change
@@ -89,16 +89,18 @@
               </div>
             </CardContent>
           </Card>
-          
+
           <!-- Add an image button if no image yet -->
-          <div 
-            v-else 
+          <div
+            v-else
             class="flex flex-col items-center justify-center mt-4 p-6 border-2 border-dashed rounded-lg border-muted-foreground/25 cursor-pointer"
             @click="isImageSelectorOpen = true"
           >
             <ImagePlusIcon class="h-12 w-12 text-muted-foreground mb-2" />
             <p class="text-muted-foreground">Add a class background image</p>
-            <Button variant="outline" size="sm" class="mt-2">Select Image</Button>
+            <Button variant="outline" size="sm" class="mt-2"
+              >Select Image</Button
+            >
           </div>
 
           <!-- Danger Zone -->
@@ -112,8 +114,8 @@
                       Actions that can't be undone
                     </p>
                   </div>
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     size="sm"
                     @click="isDeleteClassDialogOpen = true"
                   >
@@ -160,19 +162,34 @@
               class="mb-3 overflow-hidden border-l-4"
               :class="{
                 'border-green-500': getTaskStatus(task).status === 'New',
-                'border-amber-500': getTaskStatus(task).status === 'Ending Soon',
+                'border-amber-500':
+                  getTaskStatus(task).status === 'Ending Soon',
                 'border-gray-400': getTaskStatus(task).status === 'Ended',
                 'border-gray-300': getTaskStatus(task).status === 'Active',
-                'opacity-60': getTaskStatus(task).status === 'Ended'  /* Grey out ended tasks */
+                'opacity-60':
+                  getTaskStatus(task).status ===
+                  'Ended' /* Grey out ended tasks */,
               }"
             >
               <CardContent class="p-5">
                 <div class="flex justify-between items-start gap-4">
                   <div class="flex-1">
-                    <h3 class="font-semibold text-lg mb-1" :class="{ 'text-gray-500': getTaskStatus(task).status === 'Ended' }">
+                    <h3
+                      class="font-semibold text-lg mb-1"
+                      :class="{
+                        'text-gray-500': getTaskStatus(task).status === 'Ended',
+                      }"
+                    >
                       {{ task.task_name }}
                     </h3>
-                    <p class="text-sm" :class="getTaskStatus(task).status === 'Ended' ? 'text-gray-400' : 'text-muted-foreground'">
+                    <p
+                      class="text-sm"
+                      :class="
+                        getTaskStatus(task).status === 'Ended'
+                          ? 'text-gray-400'
+                          : 'text-muted-foreground'
+                      "
+                    >
                       {{ task.description }}
                     </p>
                   </div>
@@ -183,20 +200,25 @@
                       <CalendarIcon class="h-4 w-4 mr-1" />
                       <span>Due: {{ formatDate(task.end_date) }}</span>
                     </div>
-                    
+
                     <!-- Add created date here -->
                     <div
                       class="flex items-center text-sm text-muted-foreground mb-2"
                     >
                       <Clock class="h-4 w-4 mr-1" />
-                      <span>Created: {{ formatDate(task.created_at || '') }}</span>
+                      <span
+                        >Created: {{ formatDate(task.created_at || "") }}</span
+                      >
                     </div>
-                    
+
                     <Badge
                       :class="{
-                        'bg-green-500 hover:bg-green-600': getTaskStatus(task).status === 'New',
-                        'bg-amber-500 hover:bg-amber-600': getTaskStatus(task).status === 'Ending Soon',
-                        'bg-gray-400 hover:bg-gray-500': getTaskStatus(task).status === 'Ended'
+                        'bg-green-500 hover:bg-green-600':
+                          getTaskStatus(task).status === 'New',
+                        'bg-amber-500 hover:bg-amber-600':
+                          getTaskStatus(task).status === 'Ending Soon',
+                        'bg-gray-400 hover:bg-gray-500':
+                          getTaskStatus(task).status === 'Ended',
                       }"
                     >
                       {{ getTaskStatus(task).status }}
@@ -204,10 +226,20 @@
 
                     <!-- Add these buttons -->
                     <div class="flex items-center gap-2 mt-2">
-                      <Button variant="ghost" size="sm" @click="handleEditTask(task)" title="Edit task">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        @click="handleEditTask(task)"
+                        title="Edit task"
+                      >
                         <PencilIcon class="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" @click="confirmDeleteTask(task.id)" title="Delete task">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        @click="confirmDeleteTask(task.id)"
+                        title="Delete task"
+                      >
                         <TrashIcon class="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -222,7 +254,9 @@
               class="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg"
             >
               <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-              <p class="text-muted-foreground font-medium">No tasks created yet</p>
+              <p class="text-muted-foreground font-medium">
+                No tasks created yet
+              </p>
               <p class="text-sm text-muted-foreground/70 mt-1">
                 Add tasks for your students
               </p>
@@ -236,42 +270,67 @@
               <h2 class="text-xl font-bold">Criteria Management</h2>
             </div>
 
-            <div v-if="criterias.length === 0" class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg">
+            <div
+              v-if="criterias.length === 0"
+              class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg"
+            >
               <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-              <p class="text-muted-foreground font-medium">No criteria defined yet</p>
+              <p class="text-muted-foreground font-medium">
+                No criteria defined yet
+              </p>
               <p class="text-sm text-muted-foreground/70 mt-1">
                 Add criteria to evaluate student performance
               </p>
             </div>
 
-            <Card v-for="criteria in criterias" :key="criteria.id" class="overflow-hidden">
+            <Card
+              v-for="criteria in criterias"
+              :key="criteria.id"
+              class="overflow-hidden"
+            >
               <CardContent class="p-4 flex items-center justify-between">
                 <div class="flex-1">
                   <h3 class="font-medium">{{ criteria.name }}</h3>
-                  <p v-if="criteria.description" class="text-sm text-muted-foreground">
+                  <p
+                    v-if="criteria.description"
+                    class="text-sm text-muted-foreground"
+                  >
                     {{ criteria.description }}
                   </p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <Badge class="mr-2">
-                    {{ criteria.value || 1 }} points
-                  </Badge>
-                  <Button variant="ghost" size="sm" @click="handleScanCriteria(criteria.id)" title="Scan QR to award points">
+                  <Badge class="mr-2"> {{ criteria.value || 1 }} points </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="handleScanCriteria(criteria.id)"
+                    title="Scan QR to award points"
+                  >
                     <QrCodeIcon class="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" @click="handleEditCriteria(criteria)" title="Edit criteria">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="handleEditCriteria(criteria)"
+                    title="Edit criteria"
+                  >
                     <PencilIcon class="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" @click="confirmDeleteCriteria(criteria.id)" title="Delete criteria">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    @click="confirmDeleteCriteria(criteria.id)"
+                    title="Delete criteria"
+                  >
                     <TrashIcon class="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Button 
-              class="w-full flex items-center justify-center mt-4" 
-              variant="outline" 
+            <Button
+              class="w-full flex items-center justify-center mt-4"
+              variant="outline"
               @click="isAddCriteriaOpen = true"
             >
               <PlusCircleIcon class="h-5 w-5 mr-2" />
@@ -298,8 +357,8 @@
       <div v-else class="flex flex-col gap-4">
         <!-- Add this button at the top -->
         <div class="flex justify-end">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             class="text-destructive border-destructive/30 hover:bg-destructive/10"
             @click="isLeaveClassDialogOpen = true"
@@ -307,7 +366,7 @@
             Leave Class
           </Button>
         </div>
-        
+
         <h2 class="text-xl font-bold mb-2">Your Tasks</h2>
 
         <Card
@@ -318,7 +377,7 @@
             'border-green-500': getTaskStatus(task).status === 'New',
             'border-amber-500': getTaskStatus(task).status === 'Ending Soon',
             'border-red-500': getTaskStatus(task).status === 'Overdue',
-            'border-gray-300': getTaskStatus(task).status === 'Active'
+            'border-gray-300': getTaskStatus(task).status === 'Active',
           }"
         >
           <CardContent class="p-5">
@@ -336,20 +395,23 @@
                   <CalendarIcon class="h-4 w-4 mr-1" />
                   <span>Due: {{ formatDate(task.end_date) }}</span>
                 </div>
-                
+
                 <!-- Add created date here -->
                 <div
                   class="flex items-center text-sm text-muted-foreground mb-2"
                 >
                   <Clock class="h-4 w-4 mr-1" />
-                  <span>Created: {{ formatDate(task.created_at || '') }}</span>
+                  <span>Created: {{ formatDate(task.created_at || "") }}</span>
                 </div>
-                
+
                 <Badge
                   :class="{
-                    'bg-green-500 hover:bg-green-600': getTaskStatus(task).status === 'New',
-                    'bg-amber-500 hover:bg-amber-600': getTaskStatus(task).status === 'Ending Soon', 
-                    'bg-red-500 hover:bg-red-600': getTaskStatus(task).status === 'Overdue',
+                    'bg-green-500 hover:bg-green-600':
+                      getTaskStatus(task).status === 'New',
+                    'bg-amber-500 hover:bg-amber-600':
+                      getTaskStatus(task).status === 'Ending Soon',
+                    'bg-red-500 hover:bg-red-600':
+                      getTaskStatus(task).status === 'Overdue',
                   }"
                 >
                   {{ getTaskStatus(task).status }}
@@ -383,39 +445,49 @@
       <DialogHeader>
         <DialogTitle>
           <span class="text-destructive">Delete Criteria</span>
-          </DialogTitle>
+        </DialogTitle>
         <DialogDescription>
           <span class="text-sm text-secondary">
-            Are you sure you want to delete this criteria? This action cannot be undone.
+            Are you sure you want to delete this criteria? This action cannot be
+            undone.
           </span>
         </DialogDescription>
       </DialogHeader>
       <div class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isDeleteDialogOpen = false"><span class="text-secondary">Cancel</span></Button>
-        <Button variant="destructive" @click="confirmDelete"><span class="text-secondary">Delete</span></Button>
+        <Button variant="outline" @click="isDeleteDialogOpen = false"
+          ><span class="text-secondary">Cancel</span></Button
+        >
+        <Button variant="destructive" @click="confirmDelete"
+          ><span class="text-secondary">Delete</span></Button
+        >
       </div>
     </DialogContent>
   </Dialog>
 
-  <Dialog :open="isImageSelectorOpen" @update:open="isImageSelectorOpen = $event">
-    <DialogContent class="max-w-md bg-white text-black ">
+  <Dialog
+    :open="isImageSelectorOpen"
+    @update:open="isImageSelectorOpen = $event"
+  >
+    <DialogContent class="max-w-md bg-white text-black">
       <DialogHeader>
         <DialogTitle>Select Class Background</DialogTitle>
         <DialogDescription>
           Choose an image that represents this class.
         </DialogDescription>
       </DialogHeader>
-      
-      <ClassImageSelector 
-        :initialImage="classDetails?.class_img" 
-        @select="handleImageSelect" 
+
+      <ClassImageSelector
+        :initialImage="classDetails?.class_img"
+        @select="handleImageSelect"
       />
-      
+
       <DialogFooter class="flex justify-between">
-        <Button variant="outline" @click="isImageSelectorOpen = false">Cancel</Button>
-        <Button 
-          variant="default" 
-          @click="isImageSelectorOpen = false" 
+        <Button variant="outline" @click="isImageSelectorOpen = false"
+          >Cancel</Button
+        >
+        <Button
+          variant="default"
+          @click="isImageSelectorOpen = false"
           :disabled="isUpdatingImage"
         >
           Done
@@ -425,18 +497,24 @@
   </Dialog>
 
   <!-- Add these dialogs -->
-  <Dialog :open="isDeleteClassDialogOpen" @update:open="isDeleteClassDialogOpen = $event">
+  <Dialog
+    :open="isDeleteClassDialogOpen"
+    @update:open="isDeleteClassDialogOpen = $event"
+  >
     <DialogContent class="bg-white text-black">
       <DialogHeader>
         <DialogTitle class="text-destructive">Delete Class</DialogTitle>
         <DialogDescription>
-          Are you sure you want to delete this class? This action cannot be undone and will remove all student data, tasks, and criteria.
+          Are you sure you want to delete this class? This action cannot be
+          undone and will remove all student data, tasks, and criteria.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isDeleteClassDialogOpen = false">Cancel</Button>
-        <Button 
-          variant="destructive" 
+        <Button variant="outline" @click="isDeleteClassDialogOpen = false"
+          >Cancel</Button
+        >
+        <Button
+          variant="destructive"
           @click="handleDeleteClass"
           :loading="isDeleting"
         >
@@ -446,18 +524,24 @@
     </DialogContent>
   </Dialog>
 
-  <Dialog :open="isLeaveClassDialogOpen" @update:open="isLeaveClassDialogOpen = $event">
+  <Dialog
+    :open="isLeaveClassDialogOpen"
+    @update:open="isLeaveClassDialogOpen = $event"
+  >
     <DialogContent class="bg-white text-black">
       <DialogHeader>
         <DialogTitle>Leave Class</DialogTitle>
         <DialogDescription>
-          Are you sure you want to leave this class? You'll lose access to all class materials and your progress.
+          Are you sure you want to leave this class? You'll lose access to all
+          class materials and your progress.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isLeaveClassDialogOpen = false">Cancel</Button>
-        <Button 
-          variant="default" 
+        <Button variant="outline" @click="isLeaveClassDialogOpen = false"
+          >Cancel</Button
+        >
+        <Button
+          variant="default"
           class="bg-destructive hover:bg-destructive/90 text-white"
           @click="handleLeaveClass"
           :loading="isLeaving"
@@ -477,7 +561,7 @@
           Create a task for your students to complete.
         </DialogDescription>
       </DialogHeader>
-      
+
       <TaskForm
         v-if="classDetails"
         :classId="classDetails.id"
@@ -496,7 +580,7 @@
           Update the details of this task.
         </DialogDescription>
       </DialogHeader>
-      
+
       <TaskForm
         v-if="classDetails"
         :classId="classDetails.id"
@@ -508,20 +592,23 @@
   </Dialog>
 
   <!-- Delete Task Dialog -->
-  <Dialog :open="isTaskDeleteDialogOpen" @update:open="isTaskDeleteDialogOpen = $event">
+  <Dialog
+    :open="isTaskDeleteDialogOpen"
+    @update:open="isTaskDeleteDialogOpen = $event"
+  >
     <DialogContent class="bg-white text-black">
       <DialogHeader>
         <DialogTitle class="text-destructive">Delete Task</DialogTitle>
         <DialogDescription>
-          Are you sure you want to delete this task? This action cannot be undone.
+          Are you sure you want to delete this task? This action cannot be
+          undone.
         </DialogDescription>
       </DialogHeader>
       <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isTaskDeleteDialogOpen = false">Cancel</Button>
-        <Button 
-          variant="destructive" 
-          @click="handleDeleteTask"
+        <Button variant="outline" @click="isTaskDeleteDialogOpen = false"
+          >Cancel</Button
         >
+        <Button variant="destructive" @click="handleDeleteTask">
           Delete Task
         </Button>
       </DialogFooter>
@@ -575,8 +662,8 @@ import { storeToRefs } from "pinia";
 import TaskForm from "@/components/TaskForm.vue";
 
 defineOptions({
-  inheritAttrs: false
-})
+  inheritAttrs: false,
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -616,15 +703,15 @@ const isUserClass = computed(() => {
 // Add this after your existing computed properties
 const sortedTasks = computed(() => {
   if (!classTasks.value) return [];
-  
+
   return [...classTasks.value].sort((a, b) => {
     const aStatus = getTaskStatus(a).status;
     const bStatus = getTaskStatus(b).status;
-    
+
     // Sort "Ended" tasks to the bottom
     if (aStatus === "Ended" && bStatus !== "Ended") return 1;
     if (aStatus !== "Ended" && bStatus === "Ended") return -1;
-    
+
     // For non-ended tasks, sort by due date (most urgent first)
     return new Date(a.end_date).getTime() - new Date(b.end_date).getTime();
   });
@@ -644,20 +731,24 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-
 const getTaskStatus = (task: Task) => {
   const today = new Date();
   const endDate = new Date(task.end_date);
   const createdDate = task.created_at ? new Date(task.created_at) : null;
-  
+
   // Task is ending soon if due in 3 days or less
-  const daysUntilDue = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const daysUntilDue = Math.ceil(
+    (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
   if (daysUntilDue <= 0) {
     return { status: "Overdue", variant: "destructive" };
   } else if (daysUntilDue <= 3) {
     return { status: "Ending Soon", variant: "warning" };
-  } else if (createdDate && ((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)) <= 3) {
+  } else if (
+    createdDate &&
+    (today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24) <= 3
+  ) {
     return { status: "New", variant: "default" };
   } else {
     return { status: "Active", variant: "outline" };
@@ -676,7 +767,6 @@ async function refreshTasks() {
   }
 }
 
-
 async function handleAddTask(taskData: Partial<Task>) {
   try {
     await taskStore.addTask(taskData);
@@ -689,7 +779,7 @@ async function handleAddTask(taskData: Partial<Task>) {
 
 async function handleUpdateTask(taskData: Partial<Task>) {
   if (!selectedTask.value) return;
-  
+
   try {
     await taskStore.updateTask(selectedTask.value.id, taskData);
     isEditTaskOpen.value = false;
@@ -711,7 +801,7 @@ function confirmDeleteTask(taskId: number) {
 
 async function handleDeleteTask() {
   if (!taskToDelete.value) return;
-  
+
   try {
     await taskStore.deleteTask(taskToDelete.value);
     isTaskDeleteDialogOpen.value = false;
@@ -822,14 +912,14 @@ const handleScanCriteria = async (criteriaId: number) => {
 
 async function handleImageSelect(image: any) {
   if (!classDetails.value?.id) return;
-  
+
   try {
     isUpdatingImage.value = true;
     const success = await classStore.uploadClassImage(
-      image.largeImageURL, 
+      image.largeImageURL,
       classDetails.value.id
     );
-    
+
     if (success) {
       // Refresh class details to show the new image
       classDetails.value = await classStore.getClassById(classDetails.value.id);
@@ -844,11 +934,11 @@ async function handleImageSelect(image: any) {
 
 async function handleDeleteClass() {
   if (!classDetails.value?.id) return;
-  
+
   try {
     isDeleting.value = true;
     const success = await classStore.deleteClass(classDetails.value.id);
-    
+
     if (success) {
       toast.success("Class deleted successfully");
       router.push("/class");
@@ -866,11 +956,11 @@ async function handleDeleteClass() {
 
 async function handleLeaveClass() {
   if (!classDetails.value?.id) return;
-  
+
   try {
     isLeaving.value = true;
     const success = await classStore.leaveClass(classDetails.value.id);
-    
+
     if (success) {
       toast.success("You have left the class");
       router.push("/class");

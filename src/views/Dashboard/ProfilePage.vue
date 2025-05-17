@@ -151,7 +151,7 @@ import {
 } from "@/components/ui/select";
 import { useAuthStore } from "@/stores/authStore";
 import { storeToRefs } from "pinia";
-import { ChevronRightIcon, Share2Icon } from "lucide-vue-next";
+import { ChevronRightIcon } from "lucide-vue-next";
 import { ref, watch, onMounted } from "vue";
 
 import BottomSheet from "@/components/BottomSheet.vue";

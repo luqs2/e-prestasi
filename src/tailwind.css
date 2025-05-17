@@ -47,3 +47,12 @@
 /* html.dark {
   --debug-dark-mode: "enabled";
 } */
+
+* {
+  /* @apply font-['Bebas']; */
+}
+
+@font-face {
+  font-family: 'Bebas';
+  src: url('@/assets/fonts/BebasNeue-Regular.ttf') format('truetype');
+}

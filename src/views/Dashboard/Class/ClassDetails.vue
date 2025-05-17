@@ -438,182 +438,185 @@
       <p class="text-lg font-medium">Class not found</p>
       <Button @click="router.back()">Go Back</Button>
     </div>
-  </PageContainer>
 
-  <Dialog :open="isDeleteDialogOpen" @update:open="isDeleteDialogOpen = $event">
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>
-          <span class="text-destructive">Delete Criteria</span>
-        </DialogTitle>
-        <DialogDescription>
-          <span class="text-sm text-secondary">
-            Are you sure you want to delete this criteria? This action cannot be
+    <Dialog
+      :open="isDeleteDialogOpen"
+      @update:open="isDeleteDialogOpen = $event"
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            <span class="text-destructive">Delete Criteria</span>
+          </DialogTitle>
+          <DialogDescription>
+            <span class="text-sm text-secondary">
+              Are you sure you want to delete this criteria? This action cannot
+              be undone.
+            </span>
+          </DialogDescription>
+        </DialogHeader>
+        <div class="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" @click="isDeleteDialogOpen = false"
+            ><span class="text-secondary">Cancel</span></Button
+          >
+          <Button variant="destructive" @click="confirmDelete"
+            ><span class="text-secondary">Delete</span></Button
+          >
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog
+      :open="isImageSelectorOpen"
+      @update:open="isImageSelectorOpen = $event"
+    >
+      <DialogContent class="max-w-md bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Select Class Background</DialogTitle>
+          <DialogDescription>
+            Choose an image that represents this class.
+          </DialogDescription>
+        </DialogHeader>
+
+        <ClassImageSelector
+          :initialImage="classDetails?.class_img"
+          @select="handleImageSelect"
+        />
+
+        <DialogFooter class="flex justify-between">
+          <Button variant="outline" @click="isImageSelectorOpen = false"
+            >Cancel</Button
+          >
+          <Button
+            variant="default"
+            @click="isImageSelectorOpen = false"
+            :disabled="isUpdatingImage"
+          >
+            Done
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Add these dialogs -->
+    <Dialog
+      :open="isDeleteClassDialogOpen"
+      @update:open="isDeleteClassDialogOpen = $event"
+    >
+      <DialogContent class="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle class="text-destructive">Delete Class</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this class? This action cannot be
+            undone and will remove all student data, tasks, and criteria.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" @click="isDeleteClassDialogOpen = false"
+            >Cancel</Button
+          >
+          <Button
+            variant="destructive"
+            @click="handleDeleteClass"
+            :loading="isDeleting"
+          >
+            Delete Class
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <Dialog
+      :open="isLeaveClassDialogOpen"
+      @update:open="isLeaveClassDialogOpen = $event"
+    >
+      <DialogContent class="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Leave Class</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to leave this class? You'll lose access to all
+            class materials and your progress.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" @click="isLeaveClassDialogOpen = false"
+            >Cancel</Button
+          >
+          <Button
+            variant="default"
+            class="bg-destructive hover:bg-destructive/90 text-white"
+            @click="handleLeaveClass"
+            :loading="isLeaving"
+          >
+            Leave Class
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
+    <!-- Add Task Dialog -->
+    <Dialog :open="isAddTaskOpen" @update:open="isAddTaskOpen = $event">
+      <DialogContent class="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Add New Task</DialogTitle>
+          <DialogDescription>
+            Create a task for your students to complete.
+          </DialogDescription>
+        </DialogHeader>
+
+        <TaskForm
+          v-if="classDetails"
+          :classId="classDetails.id"
+          @success="handleAddTask"
+          @cancel="isAddTaskOpen = false"
+        />
+      </DialogContent>
+    </Dialog>
+
+    <!-- Edit Task Dialog -->
+    <Dialog :open="isEditTaskOpen" @update:open="isEditTaskOpen = $event">
+      <DialogContent class="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+          <DialogDescription>
+            Update the details of this task.
+          </DialogDescription>
+        </DialogHeader>
+
+        <TaskForm
+          v-if="classDetails"
+          :classId="classDetails.id"
+          :task="selectedTask"
+          @success="handleUpdateTask"
+          @cancel="isEditTaskOpen = false"
+        />
+      </DialogContent>
+    </Dialog>
+
+    <!-- Delete Task Dialog -->
+    <Dialog
+      :open="isTaskDeleteDialogOpen"
+      @update:open="isTaskDeleteDialogOpen = $event"
+    >
+      <DialogContent class="bg-white text-black">
+        <DialogHeader>
+          <DialogTitle class="text-destructive">Delete Task</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this task? This action cannot be
             undone.
-          </span>
-        </DialogDescription>
-      </DialogHeader>
-      <div class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isDeleteDialogOpen = false"
-          ><span class="text-secondary">Cancel</span></Button
-        >
-        <Button variant="destructive" @click="confirmDelete"
-          ><span class="text-secondary">Delete</span></Button
-        >
-      </div>
-    </DialogContent>
-  </Dialog>
-
-  <Dialog
-    :open="isImageSelectorOpen"
-    @update:open="isImageSelectorOpen = $event"
-  >
-    <DialogContent class="max-w-md bg-white text-black">
-      <DialogHeader>
-        <DialogTitle>Select Class Background</DialogTitle>
-        <DialogDescription>
-          Choose an image that represents this class.
-        </DialogDescription>
-      </DialogHeader>
-
-      <ClassImageSelector
-        :initialImage="classDetails?.class_img"
-        @select="handleImageSelect"
-      />
-
-      <DialogFooter class="flex justify-between">
-        <Button variant="outline" @click="isImageSelectorOpen = false"
-          >Cancel</Button
-        >
-        <Button
-          variant="default"
-          @click="isImageSelectorOpen = false"
-          :disabled="isUpdatingImage"
-        >
-          Done
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <!-- Add these dialogs -->
-  <Dialog
-    :open="isDeleteClassDialogOpen"
-    @update:open="isDeleteClassDialogOpen = $event"
-  >
-    <DialogContent class="bg-white text-black">
-      <DialogHeader>
-        <DialogTitle class="text-destructive">Delete Class</DialogTitle>
-        <DialogDescription>
-          Are you sure you want to delete this class? This action cannot be
-          undone and will remove all student data, tasks, and criteria.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isDeleteClassDialogOpen = false"
-          >Cancel</Button
-        >
-        <Button
-          variant="destructive"
-          @click="handleDeleteClass"
-          :loading="isDeleting"
-        >
-          Delete Class
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <Dialog
-    :open="isLeaveClassDialogOpen"
-    @update:open="isLeaveClassDialogOpen = $event"
-  >
-    <DialogContent class="bg-white text-black">
-      <DialogHeader>
-        <DialogTitle>Leave Class</DialogTitle>
-        <DialogDescription>
-          Are you sure you want to leave this class? You'll lose access to all
-          class materials and your progress.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isLeaveClassDialogOpen = false"
-          >Cancel</Button
-        >
-        <Button
-          variant="default"
-          class="bg-destructive hover:bg-destructive/90 text-white"
-          @click="handleLeaveClass"
-          :loading="isLeaving"
-        >
-          Leave Class
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
-
-  <!-- Add Task Dialog -->
-  <Dialog :open="isAddTaskOpen" @update:open="isAddTaskOpen = $event">
-    <DialogContent class="bg-white text-black">
-      <DialogHeader>
-        <DialogTitle>Add New Task</DialogTitle>
-        <DialogDescription>
-          Create a task for your students to complete.
-        </DialogDescription>
-      </DialogHeader>
-
-      <TaskForm
-        v-if="classDetails"
-        :classId="classDetails.id"
-        @success="handleAddTask"
-        @cancel="isAddTaskOpen = false"
-      />
-    </DialogContent>
-  </Dialog>
-
-  <!-- Edit Task Dialog -->
-  <Dialog :open="isEditTaskOpen" @update:open="isEditTaskOpen = $event">
-    <DialogContent class="bg-white text-black">
-      <DialogHeader>
-        <DialogTitle>Edit Task</DialogTitle>
-        <DialogDescription>
-          Update the details of this task.
-        </DialogDescription>
-      </DialogHeader>
-
-      <TaskForm
-        v-if="classDetails"
-        :classId="classDetails.id"
-        :task="selectedTask"
-        @success="handleUpdateTask"
-        @cancel="isEditTaskOpen = false"
-      />
-    </DialogContent>
-  </Dialog>
-
-  <!-- Delete Task Dialog -->
-  <Dialog
-    :open="isTaskDeleteDialogOpen"
-    @update:open="isTaskDeleteDialogOpen = $event"
-  >
-    <DialogContent class="bg-white text-black">
-      <DialogHeader>
-        <DialogTitle class="text-destructive">Delete Task</DialogTitle>
-        <DialogDescription>
-          Are you sure you want to delete this task? This action cannot be
-          undone.
-        </DialogDescription>
-      </DialogHeader>
-      <DialogFooter class="flex justify-end space-x-2 pt-4">
-        <Button variant="outline" @click="isTaskDeleteDialogOpen = false"
-          >Cancel</Button
-        >
-        <Button variant="destructive" @click="handleDeleteTask">
-          Delete Task
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  </Dialog>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter class="flex justify-end space-x-2 pt-4">
+          <Button variant="outline" @click="isTaskDeleteDialogOpen = false"
+            >Cancel</Button
+          >
+          <Button variant="destructive" @click="handleDeleteTask">
+            Delete Task
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </PageContainer>
 </template>
 
 <script setup lang="ts">

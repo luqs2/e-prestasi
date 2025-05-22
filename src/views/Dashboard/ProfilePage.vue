@@ -5,12 +5,41 @@
         <p class="text-sm font-bold">Profile</p>
 
         <div class="flex gap-4 mb-4">
-          <Avatar class="size-16">
-            <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
+          <div class="relative">
+            <Avatar class="size-16">
+              <AvatarImage
+                v-if="!isUploading"
+                :src="user?.user_avatar || getDefaultAvatar(user)"
+                :alt="user?.firstName || 'User'"
+              />
+              <div
+                v-else
+                class="flex items-center justify-center size-full bg-muted"
+              >
+                <span class="animate-pulse">Uploading...</span>
+              </div>
+              <AvatarFallback>{{ getInitials(user) }}</AvatarFallback>
+            </Avatar>
+            <!-- Modify the edit icon to open the bottom sheet instead -->
+            <div
+              class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1 cursor-pointer"
+              @click="showAvatarSheet = true"
+            >
+              <PencilIcon class="size-3" />
+            </div>
+            <!-- Hidden file input -->
+            <input
+              type="file"
+              ref="fileInput"
+              class="hidden"
+              accept="image/*"
+              @change="handleFileUpload"
+            />
+          </div>
           <div class="flex flex-col justify-center">
-            <p class="text-sm font-bold">{{ user?.firstName }} {{ user?.lastName }}</p>
+            <p class="text-sm font-bold">
+              {{ user?.firstName }} {{ user?.lastName }}
+            </p>
             <p class="text-xs font-light">{{ user?.email }}</p>
           </div>
         </div>
@@ -19,17 +48,6 @@
       <div class="flex flex-col gap-4">
         <p class="text-sm font-bold">General Settings</p>
 
-        <Card class="p-0">
-          <CardContent class="flex flex-1 items-center py-2 px-4">
-            <p class="text-xs font-semibold flex flex-1">Theme</p>
-            <Toggle v-model="isDarkMode">
-              <div class="flex items-center justify-center">
-                <MoonIcon v-if="isDarkMode" class="size-3 text-primary" />
-                <SunIcon v-else class="size-3 text-secondary" />
-              </div>
-            </Toggle>
-          </CardContent>
-        </Card>
         <Card class="p-0">
           <CardContent class="flex flex-1 items-center py-2 px-4">
             <p class="text-xs font-semibold flex flex-1">Notifications</p>
@@ -62,10 +80,10 @@
           <CardContent class="flex flex-1 flex-col py-2 px-4 gap-2">
             <p class="text-xs font-semibold flex flex-1">Language</p>
             <Select v-model="language">
-              <SelectTrigger class="w-full bg-muted">
+              <SelectTrigger class="w-full bg-white">
                 <SelectValue placeholder="Select a language" />
               </SelectTrigger>
-              <SelectContent class="bg-muted text-black">
+              <SelectContent class="bg-white text-black">
                 <SelectGroup>
                   <SelectItem value="english"> English </SelectItem>
                   <SelectItem value="malay"> Malay </SelectItem>
@@ -107,10 +125,17 @@
 
       <Button @click="handleLogout" :loading="isLoading">Log Out</Button>
     </div>
+
+    <BottomSheet v-model:open="showAvatarSheet">
+      <AvatarSelectionSheet @close="showAvatarSheet = false" />
+    </BottomSheet>
   </PageContainer>
 </template>
 
 <script setup lang="ts">
+import { PencilIcon } from "lucide-vue-next";
+import { ref as vueRef } from "vue";
+
 import PageContainer from "@/components/PageContainer.vue";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -126,60 +151,89 @@ import {
 } from "@/components/ui/select";
 import { useAuthStore } from "@/stores/authStore";
 import { storeToRefs } from "pinia";
-import {
-  ChevronRightIcon,
-  MoonIcon,
-  Share2Icon,
-  SunIcon,
-} from "lucide-vue-next";
+import { ChevronRightIcon } from "lucide-vue-next";
 import { ref, watch, onMounted } from "vue";
 
-// Initialize darkMode from localStorage or system preference
+import BottomSheet from "@/components/BottomSheet.vue";
+import AvatarSelectionSheet from "@/components/AvatarSelectionSheet.vue";
+
+const fileInput = vueRef<HTMLInputElement | null>(null);
+const isUploading = ref(false);
+
 const isDarkMode = ref(false);
 const isNotificationsOn = ref(false);
 const language = ref("english");
 const authStore = useAuthStore();
 const { user } = storeToRefs(authStore);
 const isLoading = ref(false);
+const showAvatarSheet = ref(false);
 
-// Initialize dark mode based on stored preference or system preference
 onMounted(() => {
-  // Check localStorage first
-  const storedTheme = localStorage.getItem('theme');
+  const storedTheme = localStorage.getItem("theme");
   if (storedTheme) {
-    isDarkMode.value = storedTheme === 'dark';
+    isDarkMode.value = storedTheme === "dark";
   } else {
-    // If no stored preference, check system preference
-    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    isDarkMode.value = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
   }
-  
-  // Apply the theme immediately on mount
   applyTheme(isDarkMode.value);
 });
 
-// Watch for changes and apply theme
 watch(isDarkMode, (newValue) => {
   applyTheme(newValue);
-  // Store preference
-  localStorage.setItem('theme', newValue ? 'dark' : 'light');
+  localStorage.setItem("theme", newValue ? "dark" : "light");
 });
 
-// Function to apply theme
 const applyTheme = (isDark: boolean) => {
   if (isDark) {
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.add("dark");
   } else {
-    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.remove("dark");
   }
-  
-  // Debug output to verify what's happening
-  console.log('Dark mode:', isDark, document.documentElement.classList.contains('dark'));
+  console.log(
+    "Dark mode:",
+    isDark,
+    document.documentElement.classList.contains("dark")
+  );
 };
+
+function getInitials(user: any) {
+  if (!user) return "NA";
+  return (user.firstName?.charAt(0) || "") + (user.lastName?.charAt(0) || "");
+}
+
+function getDefaultAvatar(user: any) {
+  if (!user) return "";
+  const seed = user.email || Math.random().toString();
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`;
+}
 
 const handleLogout = async () => {
   isLoading.value = true;
   await authStore.logout();
   isLoading.value = false;
+};
+
+const handleFileUpload = async (event: Event) => {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  isUploading.value = true;
+
+  try {
+    const success = await authStore.uploadAvatar(file);
+
+    if (!success) {
+      console.error("Failed to upload avatar");
+    }
+  } catch (error) {
+    console.error("Error in avatar upload process:", error);
+  } finally {
+    isUploading.value = false;
+  }
 };
 </script>
 

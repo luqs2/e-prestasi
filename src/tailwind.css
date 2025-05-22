@@ -19,7 +19,7 @@
 }
 
 /* Dark mode styles */
-.dark {
+/* .dark {
   background-color: var(--color-background-dark);
   color: var(--color-secondary-dark);
 }
@@ -27,26 +27,26 @@
 .dark .Card {
   background-color: #262626;
   color: var(--color-secondary-dark);
-}
+} */
 
-.dark .bg-muted {
+/* .dark .bg-muted {
   background-color: var(--color-muted-dark);
-}
+} */
 
 /* Apply dark mode variables to root for utility classes */
-:root.dark {
+/* :root.dark {
   --tw-bg-primary: var(--color-primary-dark);
   --tw-bg-secondary: var(--color-secondary-dark);
   --tw-bg-background: var(--color-background-dark);
   --tw-bg-muted: var(--color-muted-dark);
   --tw-text-primary: var(--color-primary-dark);
   --tw-text-secondary: var(--color-secondary-dark);
-}
+} */
 
 /* For debugging */
-html.dark {
+/* html.dark {
   --debug-dark-mode: "enabled";
-}
+} */
 
 * {
   /* @apply font-['Bebas']; */

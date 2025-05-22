@@ -8,4 +8,10 @@ interface Class {
   user_id: string;
   created_at: string;
   classGroup: string;
+  class_img?: string;
+}
+
+interface ClassWithPoints extends Class {
+  points: number;
+  pointsHistory: number[];
 }

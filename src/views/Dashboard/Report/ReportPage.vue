@@ -13,8 +13,8 @@
           </div>
 
           <template v-else>
-            <template v-if="myClasses.length > 0">
-              <Card v-for="cls in myClasses" :key="cls.id" variant="button">
+            <template v-if="classes.length > 0">
+              <Card v-for="cls in classes" :key="cls.id" variant="button">
                 <CardContent class="flex flex-col gap-4">
                   <div class="flex items-center">
                     <div class="flex flex-1 flex-col gap-1">
@@ -36,33 +36,37 @@
 
                   <Card variant="dark">
                     <CardContent class="text-primary flex flex-col gap-2">
-                      <p class="text-sm">Performance Summary</p>
+                      <p class="text-sm">Criteria and Points</p>
 
-                      <div class="grid grid-cols-2 grid-rows-2 gap-4">
-                        <Card variant="outline" class="p-0">
+                      <div
+                        v-if="
+                          classCriterias[cls.id] &&
+                          classCriterias[cls.id].length > 0
+                        "
+                        :class="{
+                          'grid gap-4': true,
+                          'grid-cols-1': classCriterias[cls.id].length === 1,
+                          'grid-cols-2': classCriterias[cls.id].length >= 2,
+                          'grid-rows-1': classCriterias[cls.id].length <= 2,
+                          'grid-rows-2': classCriterias[cls.id].length > 2,
+                        }"
+                      >
+                        <Card
+                          v-for="criteria in classCriterias[cls.id].slice(0, 4)"
+                          :key="criteria.id"
+                          variant="outline"
+                          class="p-0"
+                        >
                           <CardContent class="p-2">
-                            <p>Overall Grade</p>
-                            <p class="text-2xl">N/A</p>
+                            <p>{{ criteria.name }}</p>
+                            <p class="text-2xl">{{ criteria.value }} pts</p>
                           </CardContent>
                         </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Attendance</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Assignment</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Participation</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
+                      </div>
+                      <div v-else class="py-3 text-center">
+                        <p class="text-sm font-medium text-amber-300">
+                          No criteria in this class
+                        </p>
                       </div>
                     </CardContent>
                   </Card>
@@ -107,44 +111,19 @@
                       <div
                         class="flex h-full w-full items-center justify-center rounded-full bg-amber-300 text-black font-medium"
                       >
-                        {{ getClassInitials(cls.className) }}
+                        {{ getClassInitials(cls.classGroup || cls.className) }}
                       </div>
-                      <AvatarFallback>{{
-                        getClassInitials(cls.className)
-                      }}</AvatarFallback>
                     </Avatar>
                   </div>
 
                   <Card variant="dark">
                     <CardContent class="text-primary flex flex-col gap-2">
-                      <p class="text-sm">Performance Summary</p>
-
-                      <div class="grid grid-cols-2 grid-rows-2 gap-4">
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Overall Grade</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Attendance</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Assignment</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                        <Card variant="outline" class="p-0">
-                          <CardContent class="p-2">
-                            <p>Participation</p>
-                            <p class="text-2xl">N/A</p>
-                          </CardContent>
-                        </Card>
-                      </div>
+                      <p class="text-sm">My Points</p>
+                      <Card variant="outline" class="p-0">
+                        <CardContent class="p-2">
+                          <p class="text-2xl">{{ cls.points || 0 }} pts</p>
+                        </CardContent>
+                      </Card>
                     </CardContent>
                   </Card>
 
@@ -170,22 +149,21 @@
 
 <script setup lang="ts">
 import PageContainer from "@/components/PageContainer.vue";
-import { AvatarFallback, Avatar } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "vue-router";
-import { IonSpinner } from "@ionic/vue";
-import { ref, onMounted } from "vue";
 import { useClassStore } from "@/stores/classStore";
+import { IonSpinner } from "@ionic/vue";
 import { storeToRefs } from "pinia";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const classStore = useClassStore();
 const { classes, joinedClasses } = storeToRefs(classStore);
-const myClasses = ref<any[]>([]);
-const joinedClassesData = ref<any[]>([]);
 const isLoading = ref(true);
+const classCriterias = ref<{ [key: number]: any[] }>({});
 
 function getClassInitials(className: string) {
   return className
@@ -198,17 +176,6 @@ onMounted(async () => {
   try {
     await classStore.getClasses();
     await classStore.getJoinedClasses();
-
-    // Map classes to the format expected by the report view
-    myClasses.value = classes.value.map((cls) => ({
-      ...cls,
-      // Performance data would be added here in a real implementation
-    }));
-
-    joinedClassesData.value = joinedClasses.value.map((cls) => ({
-      ...cls,
-      // Performance data would be added here in a real implementation
-    }));
   } catch (error) {
     console.error("Error fetching classes:", error);
   } finally {

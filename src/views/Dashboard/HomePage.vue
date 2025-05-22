@@ -47,14 +47,29 @@
         </CardContent>
       </Card>
 
-      <!-- Todays Schedule -->
-      <div v-if="todayClasses.length > 0">
+      <!-- Today's Schedule - show only when not in expanded view -->
+      <div v-if="todayClasses.length > 0 && !showAllClasses">
         <p class="text-sm font-bold">Today's Schedule</p>
-        <div class="flex gap-4">
-          <Card v-for="(classItem, index) in todayClasses" :key="index" class="flex flex-1">
-            <CardContent class="flex flex-col gap-4 p-4">
-              <img src="" class="size-24" />
-
+        <div class="grid grid-cols-2 gap-4">
+          <Card 
+            v-for="(classItem, index) in todayClasses" 
+            :key="index" 
+            class="relative overflow-hidden h-[12rem] w-[10rem] "
+            @click="router.push(`/class/details/${classItem.id}`)"
+          >
+            <!-- Background image with overlay -->
+            <div v-if="classItem.class_img" class="absolute inset-0">
+              <img 
+                :src="classItem.class_img" 
+                :alt="classItem.className" 
+                class="w-full h-full object-cover" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+            </div>
+            <!-- Default background if no image -->
+            <div v-else class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+            
+            <CardContent class="flex flex-col gap-4 p-4 relative z-10">
               <div class="flex flex-1 flex-col gap-1">
                 <p class="text-xs font-medium">{{ classItem.classCode }}</p>
                 <p class="text-sm font-bold">{{ classItem.className }}</p>
@@ -64,14 +79,93 @@
           </Card>
         </div>
       </div>
-      <div v-else class="text-center py-4">
+      <div v-else-if="!showAllClasses" class="text-center py-4">
         <p class="text-sm font-medium text-black">No classes today</p>
+      </div>
+
+      <!-- All Classes Section - only visible when expanded -->
+      <div v-if="showAllClasses" class="flex flex-col gap-5">
+        <!-- Your Classes -->
+        <div>
+          <p class="text-sm font-bold mb-2">Your Classes</p>
+          <div v-if="classes.length > 0" class="grid grid-cols-2 gap-4">
+            <Card 
+              v-for="(classItem, index) in classes" 
+              :key="index" 
+              class="relative overflow-hidden h-[12rem] w-[10rem]"
+              @click="router.push(`/class/details/${classItem.id}`)"
+            >
+              <!-- Background image with overlay -->
+              <div v-if="classItem.class_img" class="absolute inset-0">
+                <img 
+                  :src="classItem.class_img" 
+                  :alt="classItem.className" 
+                  class="w-full h-full object-cover" 
+                />
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+              </div>
+              <!-- Default background if no image -->
+              <div v-else class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+              
+              <CardContent class="flex flex-col gap-4 p-4 relative z-10">
+                <div class="flex flex-1 flex-col gap-1">
+                  <p class="text-xs font-medium">{{ classItem.classCode }}</p>
+                  <p class="text-sm font-bold">{{ classItem.className }}</p>
+                  <p class="text-xs font-light">{{ classItem.timeFrom }} - {{ classItem.timeTo }}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div v-else class="text-center py-4 bg-muted/10 rounded-lg">
+            <p class="text-sm font-medium text-muted-foreground">No classes created yet</p>
+          </div>
+        </div>
+
+        <!-- Joined Classes -->
+        <div>
+          <p class="text-sm font-bold mb-2">Joined Classes</p>
+          <div v-if="joinedClasses.length > 0" class="grid grid-cols-2 gap-4">
+            <Card 
+              v-for="(classItem, index) in joinedClasses" 
+              :key="index" 
+              class="relative overflow-hidden h-[12rem] w-[10rem]"
+              @click="router.push(`/class/details/${classItem.id}`)"
+            >
+              <!-- Card content same as above -->
+              <div v-if="classItem.class_img" class="absolute inset-0">
+                <img 
+                  :src="classItem.class_img" 
+                  :alt="classItem.className" 
+                  class="w-full h-full object-cover" 
+                />
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+              </div>
+              <div v-else class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+              
+              <CardContent class="flex flex-col gap-4 p-4 relative z-10">
+                <div class="flex flex-1 flex-col gap-1">
+                  <p class="text-xs font-medium">{{ classItem.classCode }}</p>
+                  <p class="text-sm font-bold">{{ classItem.className }}</p>
+                  <p class="text-xs font-light">{{ classItem.timeFrom }} - {{ classItem.timeTo }}</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div v-else class="text-center py-4 bg-muted/10 rounded-lg">
+            <p class="text-sm font-medium text-muted-foreground">You haven't joined any classes yet</p>
+          </div>
+        </div>
       </div>
 
       <!-- Buttons -->
       <div class="flex flex-row gap-4 flex-1">
-        <Button class="flex flex-1"><EyeIcon />View All</Button>
-        <Button class="flex flex-1"><PlusCircleIcon />Add Class</Button>
+        <Button class="flex flex-1" @click="toggleViewAll">
+          <component :is="showAllClasses ? EyeOffIcon : EyeIcon" class="mr-2" />
+          {{ showAllClasses ? 'View Less' : 'View All' }}
+        </Button>
+        <Button class="flex flex-1" @click="router.push('/class')">
+          <PlusCircleIcon class="mr-2" />Add Class
+        </Button>
       </div>
 
       <Button @click="showQRCode = true" v-if="!showQRCode">
@@ -95,7 +189,8 @@ import { QrcodeSvg } from "qrcode.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { useClassStore } from "@/stores/classStore";
 import { storeToRefs } from "pinia";
-import { EyeIcon, PlusCircleIcon, QrCodeIcon } from "lucide-vue-next";
+import { EyeIcon, PlusCircleIcon, QrCodeIcon, EyeOffIcon } from "lucide-vue-next";
+import { useRouter } from "vue-router";
 
 const progress = ref(85)
 const greeting = computed(() => {
@@ -109,10 +204,12 @@ const greeting = computed(() => {
 const RADIUS = 45;
 const circumference = 2 * Math.PI * RADIUS;
 const showQRCode = ref(false);
+const showAllClasses = ref(false);
 const authStore = useAuthStore();
 const classStore = useClassStore();
 const { user } = storeToRefs(authStore);
-const { joinedClasses } = storeToRefs(classStore);
+const { joinedClasses, classes } = storeToRefs(classStore);
+const router = useRouter();
 
 // Get today's day (0 = Sunday, 1 = Monday, etc.)
 const today = computed(() => {
@@ -120,12 +217,17 @@ const today = computed(() => {
   return days[new Date().getDay()];
 });
 
-// Filter classes for today
+// Add parameter type to normalize day function
+function normalizeDay(day: string | undefined | null): string {
+  if (!day) return '';
+  return day.toLowerCase();
+}
+
 const todayClasses = computed(() => {
-  return joinedClasses.value.filter((classItem) => classItem.day === today.value);
+  return joinedClasses.value.filter((classItem) => 
+    normalizeDay(classItem.day) === normalizeDay(today.value)
+  );
 });
-
-
 
 const dashOffset = computed(() => (progress.value / 100) * circumference);
 
@@ -139,6 +241,10 @@ const trackPath = computed(() => {
           `;
 });
 
+function toggleViewAll() {
+  showAllClasses.value = !showAllClasses.value;
+}
+
 onMounted(() => {
   setInterval(() => {
     if (progress.value < 100) {
@@ -151,7 +257,13 @@ onMounted(() => {
 
 // Fetch classes when component mounts
 onMounted(() => {
+  classStore.getClasses();
   classStore.getJoinedClasses();
+  classStore.getJoinedClasses().then(() => {
+    console.log("All joined classes:", joinedClasses.value);
+    console.log("Today is:", today.value);
+    console.log("Filtered classes for today:", todayClasses.value);
+  });
 });
 </script>
 

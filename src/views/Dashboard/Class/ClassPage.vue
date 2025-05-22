@@ -17,8 +17,19 @@
                 v-for="cls in classes"
                 :key="cls.id"
                 @click="router.push(`/class/details/${cls.id}`)"
+                class="relative overflow-hidden"
               >
-                <CardContent class="flex items-center p-4">
+                <div v-if="cls.class_img" class="absolute inset-0">
+                  <img 
+                    :src="cls.class_img" 
+                    :alt="cls.className" 
+                    class="w-full h-full object-cover" 
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+                </div>
+                <div v-else class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+                
+                <CardContent class="flex items-center p-4 relative z-10">
                   <div class="flex flex-1 flex-col gap-1">
                     <p class="text-xs font-medium">{{ cls.classCode }}</p>
                     <p class="text-sm font-bold">{{ cls.className }}</p>
@@ -61,8 +72,19 @@
                 v-for="cls in joinedClasses"
                 :key="cls.id"
                 @click="router.push(`/class/details/${cls.id}`)"
+                class="relative overflow-hidden"
               >
-                <CardContent class="flex items-center p-4">
+                <div v-if="cls.class_img" class="absolute inset-0">
+                  <img 
+                    :src="cls.class_img" 
+                    :alt="cls.className" 
+                    class="w-full h-full object-cover" 
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40"></div>
+                </div>
+                <div v-else class="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/5"></div>
+                
+                <CardContent class="flex items-center p-4 relative z-10">
                   <div class="flex flex-1 flex-col gap-1">
                     <p class="text-xs font-medium">{{ cls.classCode }}</p>
                     <p class="text-sm font-bold">{{ cls.className }}</p>

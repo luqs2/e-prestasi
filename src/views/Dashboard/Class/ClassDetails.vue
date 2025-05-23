@@ -616,6 +616,31 @@
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <!-- Add this dialog before the closing PageContainer tag -->
+    <Dialog :open="isShareDialogOpen" @update:open="isShareDialogOpen = $event">
+      <DialogContent class="bg-white text-black max-w-md">
+        <DialogHeader>
+          <DialogTitle>Share Class</DialogTitle>
+          <DialogDescription>
+            Scan this QR code to join the class
+          </DialogDescription>
+        </DialogHeader>
+
+        <div class="flex flex-col items-center justify-center py-4">
+          <qrcode-svg :value="classDetails?.id.toString()" level="L" />
+          <p class="mt-4 text-sm text-muted-foreground">
+            Class ID: {{ classDetails?.id }}
+          </p>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" @click="isShareDialogOpen = false">
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </PageContainer>
 </template>
 
@@ -663,6 +688,7 @@ import { toast } from "vue-sonner"; // Add at the top of your imports
 import { useTaskStore } from "@/stores/taskStore";
 import { storeToRefs } from "pinia";
 import TaskForm from "@/components/TaskForm.vue";
+import { QrcodeSvg } from "qrcode.vue";
 
 defineOptions({
   inheritAttrs: false,
@@ -696,6 +722,7 @@ const isEditTaskOpen = ref(false);
 const selectedTask = ref<Task | null>(null);
 const isTaskDeleteDialogOpen = ref(false);
 const taskToDelete = ref<number | null>(null);
+const isShareDialogOpen = ref(false);
 
 // Check if the current user created this class
 const isUserClass = computed(() => {
@@ -721,8 +748,7 @@ const sortedTasks = computed(() => {
 });
 
 const handleShareClass = () => {
-  // Open share dialog
-  console.log("Share class");
+  isShareDialogOpen.value = true;
 };
 
 const formatDate = (dateString: string) => {

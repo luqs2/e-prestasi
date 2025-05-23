@@ -1,11 +1,14 @@
 <template>
+  <!-- Main container for the class details page -->
   <PageContainer v-bind="$attrs">
+    <!-- Loading spinner while fetching class data -->
     <div v-if="isLoading" class="flex items-center justify-center h-40">
       <IonSpinner class="size-12" />
     </div>
 
+    <!-- Main content when class details are loaded -->
     <div v-else-if="classDetails" class="flex flex-col gap-6">
-      <!-- Keep existing header -->
+      <!-- Class header with back button and basic info -->
       <div class="flex items-center gap-4">
         <Button variant="outline" size="iconsm" @click="router.back()">
           <ChevronLeft class="size-6 text-primary" />
@@ -27,12 +30,13 @@
         </div>
       </div>
 
-      <!-- Replace controls with Tabs -->
+      <!-- Teacher view tabs for class management -->
       <Tabs
         default-value="overview"
         class="flex flex-col gap-8"
         v-if="isUserClass"
       >
+        <!-- Tab navigation -->
         <TabsList class="w-full">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="students">Students</TabsTrigger>
@@ -40,11 +44,13 @@
           <TabsTrigger value="criteria">Criterias</TabsTrigger>
         </TabsList>
 
+        <!-- Overview tab content -->
         <TabsContent value="overview">
+          <!-- Quick actions card -->
           <Card class="bg-primary text-primary-foreground" variant="dark">
             <CardContent class="p-4">
               <div class="flex justify-around">
-                <!-- Share Class Button -->
+                <!-- Share class button -->
                 <div
                   class="flex flex-col items-center gap-2 cursor-pointer"
                   @click="handleShareClass"
@@ -55,7 +61,7 @@
                   <span class="text-xs text-primary">Share Class</span>
                 </div>
 
-                <!-- Add Image Button -->
+                <!-- Add/change class image button -->
                 <div
                   class="flex flex-col items-center gap-2 cursor-pointer"
                   @click="isImageSelectorOpen = true"
@@ -69,7 +75,7 @@
             </CardContent>
           </Card>
 
-          <!-- Class Background Image (if available) -->
+          <!-- Class background image display -->
           <Card v-if="classDetails.class_img" class="mt-4 overflow-hidden">
             <CardContent class="p-0">
               <div class="relative">
@@ -90,7 +96,7 @@
             </CardContent>
           </Card>
 
-          <!-- Add an image button if no image yet -->
+          <!-- Empty state for class image -->
           <div
             v-else
             class="flex flex-col items-center justify-center mt-4 p-6 border-2 border-dashed rounded-lg border-muted-foreground/25 cursor-pointer"
@@ -103,7 +109,7 @@
             >
           </div>
 
-          <!-- Danger Zone -->
+          <!-- Danger zone section for class deletion -->
           <div class="mt-8 flex flex-col gap-4">
             <Card class="border-destructive/30">
               <CardContent class="p-4">
@@ -127,10 +133,11 @@
           </div>
         </TabsContent>
 
+        <!-- Students tab content -->
         <TabsContent value="students">
-          <!-- Add your student list content here -->
           <div class="flex flex-col gap-4">
             <h2 class="text-xl font-bold">Student List</h2>
+            <!-- Student cards with points -->
             <Card v-for="student in students" :key="student.id">
               <CardContent class="flex justify-between">
                 <p>
@@ -145,8 +152,10 @@
           </div>
         </TabsContent>
 
+        <!-- Tasks tab content -->
         <TabsContent value="tasks">
           <div class="flex flex-col gap-4">
+            <!-- Tasks header with add button -->
             <div class="flex justify-between items-center">
               <h2 class="text-xl font-bold">Tasks Management</h2>
               <Button variant="outline" @click="isAddTaskOpen = true">
@@ -155,7 +164,7 @@
               </Button>
             </div>
 
-            <!-- Task List -->
+            <!-- Task list with status indicators -->
             <Card
               v-for="task in sortedTasks"
               :key="task.id"
@@ -194,6 +203,7 @@
                     </p>
                   </div>
                   <div class="flex flex-col items-end">
+                    <!-- Task dates -->
                     <div
                       class="flex items-center text-sm text-muted-foreground mb-1"
                     >
@@ -201,7 +211,6 @@
                       <span>Due: {{ formatDate(task.end_date) }}</span>
                     </div>
 
-                    <!-- Add created date here -->
                     <div
                       class="flex items-center text-sm text-muted-foreground mb-2"
                     >
@@ -211,6 +220,7 @@
                       >
                     </div>
 
+                    <!-- Task status badge -->
                     <Badge
                       :class="{
                         'bg-green-500 hover:bg-green-600':
@@ -224,7 +234,7 @@
                       {{ getTaskStatus(task).status }}
                     </Badge>
 
-                    <!-- Add these buttons -->
+                    <!-- Task action buttons -->
                     <div class="flex items-center gap-2 mt-2">
                       <Button
                         variant="ghost"
@@ -248,7 +258,7 @@
               </CardContent>
             </Card>
 
-            <!-- Empty state -->
+            <!-- Empty state for tasks -->
             <div
               v-if="classTasks.length === 0"
               class="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg"
@@ -264,12 +274,14 @@
           </div>
         </TabsContent>
 
+        <!-- Criteria tab content -->
         <TabsContent value="criteria">
           <div class="flex flex-col gap-4">
             <div class="flex justify-between items-center">
               <h2 class="text-xl font-bold">Criteria Management</h2>
             </div>
 
+            <!-- Empty state for criteria -->
             <div
               v-if="criterias.length === 0"
               class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg"
@@ -283,6 +295,7 @@
               </p>
             </div>
 
+            <!-- Criteria list with actions -->
             <Card
               v-for="criteria in criterias"
               :key="criteria.id"
@@ -300,6 +313,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <Badge class="mr-2"> {{ criteria.value || 1 }} points </Badge>
+                  <!-- Criteria action buttons -->
                   <Button
                     variant="ghost"
                     size="sm"
@@ -328,6 +342,7 @@
               </CardContent>
             </Card>
 
+            <!-- Add new criteria button -->
             <Button
               class="w-full flex items-center justify-center mt-4"
               variant="outline"
@@ -337,6 +352,7 @@
               <span>Add New Evaluation Criteria</span>
             </Button>
 
+            <!-- Criteria management dialogs -->
             <AddCriteriaSheet
               v-model:open="isAddCriteriaOpen"
               :classId="classDetails.id"
@@ -353,9 +369,9 @@
         </TabsContent>
       </Tabs>
 
-      <!-- Student View - Keep existing code for non-teacher view -->
+      <!-- Student view content -->
       <div v-else class="flex flex-col gap-4">
-        <!-- Add this button at the top -->
+        <!-- Leave class button -->
         <div class="flex justify-end">
           <Button
             variant="outline"
@@ -367,6 +383,7 @@
           </Button>
         </div>
 
+        <!-- Student's task list -->
         <h2 class="text-xl font-bold mb-2">Your Tasks</h2>
 
         <Card
@@ -389,6 +406,7 @@
                 </p>
               </div>
               <div class="flex flex-col items-end">
+                <!-- Task dates -->
                 <div
                   class="flex items-center text-sm text-muted-foreground mb-1"
                 >
@@ -396,7 +414,6 @@
                   <span>Due: {{ formatDate(task.end_date) }}</span>
                 </div>
 
-                <!-- Add created date here -->
                 <div
                   class="flex items-center text-sm text-muted-foreground mb-2"
                 >
@@ -404,6 +421,7 @@
                   <span>Created: {{ formatDate(task.created_at || "") }}</span>
                 </div>
 
+                <!-- Task status badge -->
                 <Badge
                   :class="{
                     'bg-green-500 hover:bg-green-600':
@@ -421,6 +439,7 @@
           </CardContent>
         </Card>
 
+        <!-- Empty state for student tasks -->
         <div
           v-if="classTasks.length === 0"
           class="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg"
@@ -434,11 +453,14 @@
       </div>
     </div>
 
+    <!-- Not found state -->
     <div v-else class="flex flex-col items-center justify-center h-40 gap-4">
       <p class="text-lg font-medium">Class not found</p>
       <Button @click="router.back()">Go Back</Button>
     </div>
 
+    <!-- Various dialogs for different actions -->
+    <!-- Delete criteria dialog -->
     <Dialog
       :open="isDeleteDialogOpen"
       @update:open="isDeleteDialogOpen = $event"
@@ -466,6 +488,7 @@
       </DialogContent>
     </Dialog>
 
+    <!-- Class image selector dialog -->
     <Dialog
       :open="isImageSelectorOpen"
       @update:open="isImageSelectorOpen = $event"
@@ -498,7 +521,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- Add these dialogs -->
+    <!-- Delete class dialog -->
     <Dialog
       :open="isDeleteClassDialogOpen"
       @update:open="isDeleteClassDialogOpen = $event"
@@ -526,6 +549,7 @@
       </DialogContent>
     </Dialog>
 
+    <!-- Leave class dialog -->
     <Dialog
       :open="isLeaveClassDialogOpen"
       @update:open="isLeaveClassDialogOpen = $event"
@@ -554,7 +578,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- Add Task Dialog -->
+    <!-- Add task dialog -->
     <Dialog :open="isAddTaskOpen" @update:open="isAddTaskOpen = $event">
       <DialogContent class="bg-white text-black">
         <DialogHeader>
@@ -573,7 +597,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- Edit Task Dialog -->
+    <!-- Edit task dialog -->
     <Dialog :open="isEditTaskOpen" @update:open="isEditTaskOpen = $event">
       <DialogContent class="bg-white text-black">
         <DialogHeader>
@@ -593,7 +617,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- Delete Task Dialog -->
+    <!-- Delete task dialog -->
     <Dialog
       :open="isTaskDeleteDialogOpen"
       @update:open="isTaskDeleteDialogOpen = $event"
@@ -617,7 +641,7 @@
       </DialogContent>
     </Dialog>
 
-    <!-- Add this dialog before the closing PageContainer tag -->
+    <!-- Share class dialog with QR code -->
     <Dialog :open="isShareDialogOpen" @update:open="isShareDialogOpen = $event">
       <DialogContent class="bg-white text-black max-w-md">
         <DialogHeader>
@@ -646,35 +670,14 @@
 
 <script setup lang="ts">
 import AddCriteriaSheet from "@/components/AddCriteriaSheet.vue";
+import ClassImageSelector from "@/components/ClassImageSelector.vue";
 import EditCriteriaSheet from "@/components/EditCriteriaSheet.vue";
 import PageContainer from "@/components/PageContainer.vue";
+import TaskForm from "@/components/TaskForm.vue";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/lib/supabase";
-import { useClassStore } from "@/stores/classStore";
-import { IonSpinner } from "@ionic/vue";
-import {
-  CalendarIcon,
-  ChevronLeft,
-  ClipboardList,
-  PlusCircleIcon,
-  QrCodeIcon,
-  Share2,
-  TrashIcon,
-  PencilIcon,
-  ImageIcon,
-  ImagePlusIcon,
-  Clock,
-} from "lucide-vue-next";
-import { computed, onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import {
-  CapacitorBarcodeScanner,
-  CapacitorBarcodeScannerTypeHint,
-} from "@capacitor/barcode-scanner";
 import {
   Dialog,
   DialogContent,
@@ -683,30 +686,57 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import ClassImageSelector from "@/components/ClassImageSelector.vue";
-import { toast } from "vue-sonner"; // Add at the top of your imports
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/lib/supabase";
+import { useClassStore } from "@/stores/classStore";
 import { useTaskStore } from "@/stores/taskStore";
+import {
+  CapacitorBarcodeScanner,
+  CapacitorBarcodeScannerTypeHint,
+} from "@capacitor/barcode-scanner";
+import { IonSpinner } from "@ionic/vue";
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ClipboardList,
+  Clock,
+  ImageIcon,
+  ImagePlusIcon,
+  PencilIcon,
+  PlusCircleIcon,
+  QrCodeIcon,
+  Share2,
+  TrashIcon,
+} from "lucide-vue-next";
 import { storeToRefs } from "pinia";
-import TaskForm from "@/components/TaskForm.vue";
 import { QrcodeSvg } from "qrcode.vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner";
 
+// Disable attribute inheritance to prevent unwanted prop passing
 defineOptions({
   inheritAttrs: false,
 });
 
+// Router and store initialization
 const route = useRoute();
 const router = useRouter();
 const classStore = useClassStore();
+const taskStore = useTaskStore();
+
+// Reactive state variables
 const classDetails = ref<Class | null>(null);
 const isLoading = ref(true);
 const currentUserId = ref<string | null>(null);
 const students = ref<any[]>([]);
 const criterias = ref<any[]>([]);
+
+// Dialog state management
 const isAddCriteriaOpen = ref(false);
 const isEditCriteriaOpen = ref(false);
 const selectedCriteria = ref<Record<string, any> | null>(null);
 const isScanning = ref(false);
-const scanError = ref<string | null>(null);
 const isDeleteDialogOpen = ref(false);
 const criteriaToDelete = ref<number | null>(null);
 const isImageSelectorOpen = ref(false);
@@ -716,21 +746,32 @@ const isDeleteClassDialogOpen = ref(false);
 const isDeleting = ref(false);
 const isLeaving = ref(false);
 const isAddTaskOpen = ref(false);
-const taskStore = useTaskStore();
-const { classTasks } = storeToRefs(taskStore);
 const isEditTaskOpen = ref(false);
 const selectedTask = ref<Task | null>(null);
 const isTaskDeleteDialogOpen = ref(false);
 const taskToDelete = ref<number | null>(null);
 const isShareDialogOpen = ref(false);
 
-// Check if the current user created this class
+// QR Scanner state management
+const isContinuousScanning = ref(false);
+const scannedCodes = ref<Set<string>>(new Set());
+const lastScannedStudent = ref<{
+  user_id: string;
+  firstName: string;
+  lastName: string;
+} | null>(null);
+const isScannedSameStudent = ref(false);
+
+// Store refs
+const { classTasks } = storeToRefs(taskStore);
+
+// Computed property to check if current user is the class creator
 const isUserClass = computed(() => {
   if (!classDetails.value || !currentUserId.value) return false;
   return classDetails.value.user_id === currentUserId.value;
 });
 
-// Add this after your existing computed properties
+// Computed property to sort tasks by status and due date
 const sortedTasks = computed(() => {
   if (!classTasks.value) return [];
 
@@ -747,10 +788,12 @@ const sortedTasks = computed(() => {
   });
 });
 
+// Function to handle class sharing
 const handleShareClass = () => {
   isShareDialogOpen.value = true;
 };
 
+// Utility function to format dates
 const formatDate = (dateString: string) => {
   const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
@@ -760,16 +803,18 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
+// Function to determine task status based on dates
 const getTaskStatus = (task: Task) => {
   const today = new Date();
   const endDate = new Date(task.end_date);
   const createdDate = task.created_at ? new Date(task.created_at) : null;
 
-  // Task is ending soon if due in 3 days or less
+  // Calculate days until due
   const daysUntilDue = Math.ceil(
     (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
   );
 
+  // Return appropriate status based on timing
   if (daysUntilDue <= 0) {
     return { status: "Overdue", variant: "destructive" };
   } else if (daysUntilDue <= 3) {
@@ -784,18 +829,21 @@ const getTaskStatus = (task: Task) => {
   }
 };
 
+// Function to refresh criteria list
 const refreshCriterias = async () => {
   if (classDetails.value) {
     criterias.value = await classStore.getCriterias(classDetails.value.id);
   }
 };
 
+// Function to refresh task list
 async function refreshTasks() {
   if (classDetails.value) {
     await taskStore.getTasksByClassId(classDetails.value.id);
   }
 }
 
+// Task management functions
 async function handleAddTask(taskData: Partial<Task>) {
   try {
     await taskStore.addTask(taskData);
@@ -840,6 +888,7 @@ async function handleDeleteTask() {
   }
 }
 
+// Component lifecycle hooks
 onMounted(async () => {
   try {
     // Get current user ID
@@ -851,6 +900,7 @@ onMounted(async () => {
       return;
     }
 
+    // Fetch class details and related data
     classDetails.value = await classStore.getClassById(classId);
 
     if (classDetails.value) {
@@ -867,6 +917,7 @@ onMounted(async () => {
   }
 });
 
+// Criteria management functions
 const handleRemoveCriteria = async (criteriaId: number) => {
   await classStore.removeCriteria(classDetails.value?.id as number, criteriaId);
   refreshCriterias();
@@ -890,55 +941,126 @@ const handleEditCriteria = (criteria: Record<string, any>) => {
   isEditCriteriaOpen.value = true;
 };
 
-const handleScanCriteria = async (criteriaId: number) => {
-  console.log("Scanning criteria with ID:", criteriaId);
+// QR Scanner functions
+const startContinuousScanning = async (criteriaId: number) => {
   try {
-    // Prepare UI for scanning
+    // Initialize scanner state
+    isContinuousScanning.value = true;
     isScanning.value = true;
     document.querySelector("body")?.classList.add("scanner-active");
+    scannedCodes.value.clear();
+    lastScannedStudent.value = null;
+    isScannedSameStudent.value = false;
 
-    // Start scanning
-    const result = await CapacitorBarcodeScanner.scanBarcode({
-      hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
-    });
+    // Main scanning loop
+    while (isContinuousScanning.value) {
+      try {
+        // Configure scanner with appropriate instructions
+        const result = await CapacitorBarcodeScanner.scanBarcode({
+          hint: CapacitorBarcodeScannerTypeHint.QR_CODE,
+          scanInstructions:
+            lastScannedStudent.value && !isScannedSameStudent.value
+              ? `Successfully awarded points to student ${lastScannedStudent.value?.firstName} ${lastScannedStudent.value?.lastName}\nScan the QR code of the next student to award points`
+              : isScannedSameStudent.value && lastScannedStudent.value
+              ? `Student ${lastScannedStudent.value?.firstName} ${lastScannedStudent.value?.lastName} has already been scanned in this session.\nScan the QR code of the next student to award points`
+              : "Scan the QR code of the student to award points",
+        });
 
-    if (result.ScanResult) {
-      console.log("Scanned content:", result.ScanResult);
-      // Handle the scanned QR code content here
-      // You might want to validate the content or process it further
+        if (result.ScanResult) {
+          const qrCode = result.ScanResult;
 
-      //After scanning, get userid from the scanned QR code and award points
-      const res = await supabase
-        .from("profiles")
-        .select("user_id")
-        .eq("qr_id", result.ScanResult)
-        .single();
+          // Check if student has already been scanned
+          if (!scannedCodes.value.has(qrCode)) {
+            scannedCodes.value.add(qrCode);
 
-      if (res.data)
-        await classStore.awardPoints(
-          classDetails.value?.id as number,
-          res.data.user_id,
-          criteriaId
-        );
+            try {
+              // Get student information from database
+              const res = await supabase
+                .from("profiles")
+                .select("user_id, firstName, lastName")
+                .eq("qr_id", qrCode)
+                .single();
 
-      // Refresh the student list after updating points
-      if (classDetails.value) {
-        students.value = await classStore.getStudentsInClass(
-          classDetails.value.id
-        );
+              if (res.data) {
+                // Award points to student
+                await classStore.awardPoints(
+                  classDetails.value?.id as number,
+                  res.data.user_id,
+                  criteriaId
+                );
+
+                // Update last scanned student
+                lastScannedStudent.value = res.data;
+
+                // Show success message
+                toast.success(
+                  `Points awarded to ${res.data.firstName} ${res.data.lastName}.`
+                );
+              }
+            } catch (error) {
+              console.error("Error processing QR code:", error);
+              toast.error(`Failed to process QR code: ${qrCode}`);
+            }
+          } else {
+            // Handle already scanned student
+            toast.info("This student has already been scanned in this session");
+            isScannedSameStudent.value = true;
+          }
+        }
+      } catch (error) {
+        // Handle user cancellation
+        if (
+          error instanceof Error &&
+          (error.message.includes("User cancelled") ||
+            error.message.includes("canceled") ||
+            error.message.includes("cancelled"))
+        ) {
+          isContinuousScanning.value = false;
+          break;
+        }
+        console.error("Scanning error:", error);
+        toast.error("Failed to scan QR code");
       }
     }
   } catch (error) {
-    console.error("Scanning failed:", error);
-    scanError.value =
-      error instanceof Error ? error.message : "Failed to scan QR code";
+    console.error("Error in continuous scanning:", error);
+    toast.error("Failed to start scanning");
   } finally {
-    // Cleanup
-    isScanning.value = false;
-    document.querySelector("body")?.classList.remove("scanner-active");
+    stopContinuousScanning();
   }
 };
 
+// Function to stop scanning and clean up
+const stopContinuousScanning = () => {
+  isContinuousScanning.value = false;
+  isScanning.value = false;
+  document.querySelector("body")?.classList.remove("scanner-active");
+  lastScannedStudent.value = null;
+
+  // Refresh student list
+  if (classDetails.value) {
+    classStore.getStudentsInClass(classDetails.value.id).then((result) => {
+      students.value = result;
+    });
+  }
+};
+
+// Function to handle criteria scanning
+const handleScanCriteria = async (criteriaId: number) => {
+  if (isContinuousScanning.value) {
+    stopContinuousScanning();
+    return;
+  }
+
+  startContinuousScanning(criteriaId);
+};
+
+// Cleanup on component unmount
+onUnmounted(() => {
+  stopContinuousScanning();
+});
+
+// Image management functions
 async function handleImageSelect(image: any) {
   if (!classDetails.value?.id) return;
 
@@ -950,7 +1072,7 @@ async function handleImageSelect(image: any) {
     );
 
     if (success) {
-      // Refresh class details to show the new image
+      // Refresh class details to show new image
       classDetails.value = await classStore.getClassById(classDetails.value.id);
       isImageSelectorOpen.value = false;
     }
@@ -961,6 +1083,7 @@ async function handleImageSelect(image: any) {
   }
 }
 
+// Class management functions
 async function handleDeleteClass() {
   if (!classDetails.value?.id) return;
 

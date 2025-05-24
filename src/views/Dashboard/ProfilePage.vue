@@ -3,10 +3,14 @@
     <ion-content>
       <PageContainer>
         <!-- Enhanced header section with user info -->
-        <div class="flex flex-col sm:flex-row gap-4 bg-white/50 backdrop-blur-sm p-6 rounded-2xl shadow-sm mb-6">
+        <div
+          class="flex flex-col sm:flex-row gap-4 bg-white/50 backdrop-blur-sm p-6 rounded-2xl shadow-sm mb-6"
+        >
           <div class="flex items-center gap-4">
             <div class="relative">
-              <Avatar class="h-16 w-16 border-2 border-white shadow-md bg-gray-100">
+              <Avatar
+                class="h-16 w-16 border-2 border-white shadow-md bg-gray-100"
+              >
                 <AvatarImage
                   v-if="!isUploading"
                   :src="user?.user_avatar || getDefaultAvatar(user)"
@@ -18,7 +22,9 @@
                 >
                   <IonSpinner class="size-6 text-primary" />
                 </div>
-                <AvatarFallback class="bg-primary/20 text-primary font-bold text-lg">
+                <AvatarFallback
+                  class="bg-primary/20 text-primary font-bold text-lg"
+                >
                   {{ getInitials(user) }}
                 </AvatarFallback>
               </Avatar>
@@ -29,27 +35,31 @@
                 <PencilIcon class="size-3" />
               </div>
             </div>
-            
+
             <div>
-              <h1 class="text-2xl font-bold text-black">{{ user?.firstName }} {{ user?.lastName }}</h1>
-              <p class="text-gray-600 flex items-center gap-1.5 mt-0.5">
-                <Mail class="size-4" />
-                {{ user?.email }}
+              <h1 class="text-2xl font-bold text-black break-words">
+                {{ user?.firstName }} {{ user?.lastName }}
+              </h1>
+              <p class="text-gray-600 flex items-start gap-1.5 mt-0.5">
+                <Mail class="text-sm flex-shrink-0 mt-1" />
+                <span class="break-all">{{ user?.email }}</span>
               </p>
             </div>
           </div>
-          
+
           <div class="ml-auto flex items-center">
-      <Button 
-        variant="outline" 
-        class="flex items-center gap-2 rounded-full font-semibold"
-        @click="handleLogout" 
-        :disabled="isLoading"
-      >
-        <LogOut class="size-4 text-red-600" />
-        <span class="text-red-600">{{ isLoading ? 'Logging out...' : 'Log Out' }}</span>
-      </Button>
-    </div>
+            <Button
+              variant="outline"
+              class="flex items-center gap-2 rounded-full font-semibold"
+              @click="handleLogout"
+              :disabled="isLoading"
+            >
+              <LogOut class="size-4 text-red-600" />
+              <span class="text-red-600">{{
+                isLoading ? "Logging out..." : "Log Out"
+              }}</span>
+            </Button>
+          </div>
         </div>
 
         <!-- Settings sections with modern styling -->
@@ -60,11 +70,15 @@
             <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6">
               <div class="flex items-center gap-2 mb-4">
                 <Settings2 class="size-5 text-primary" />
-                <h2 class="text-lg font-semibold text-black">General Settings</h2>
+                <h2 class="text-lg font-semibold text-black">
+                  General Settings
+                </h2>
               </div>
-              
+
               <div class="space-y-3">
-                <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
+                <Card
+                  class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                >
                   <CardContent class="flex items-center justify-between p-4">
                     <div class="flex items-center gap-3">
                       <div class="rounded-full bg-blue-100 p-2">
@@ -72,14 +86,18 @@
                       </div>
                       <div>
                         <p class="font-medium">Notifications</p>
-                        <p class="text-xs text-gray-500">Get alerts about new activities</p>
+                        <p class="text-xs text-gray-500">
+                          Get alerts about new activities
+                        </p>
                       </div>
                     </div>
                     <Toggle v-model="isNotificationsOn" />
                   </CardContent>
                 </Card>
-                
-                <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
+
+                <Card
+                  class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                >
                   <CardContent class="flex items-center justify-between p-4">
                     <div class="flex items-center gap-3">
                       <div class="rounded-full bg-purple-100 p-2">
@@ -87,7 +105,9 @@
                       </div>
                       <div>
                         <p class="font-medium">Language</p>
-                        <p class="text-xs text-gray-500">Choose your preferred language</p>
+                        <p class="text-xs text-gray-500">
+                          Choose your preferred language
+                        </p>
                       </div>
                     </div>
                     <Select v-model="language" class="w-32">
@@ -101,7 +121,7 @@
                     </Select>
                   </CardContent>
                 </Card>
-                
+
                 <!-- <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
                   <CardContent class="flex items-center justify-between p-4">
                     <div class="flex items-center gap-3">
@@ -118,54 +138,72 @@
                 </Card> -->
               </div>
             </div>
-            
+
             <!-- Information section remains unchanged -->
             <div class="bg-white/80 backdrop-blur-sm rounded-xl shadow-sm p-6">
               <div class="flex items-center gap-2 mb-4">
                 <Info class="size-5 text-primary" />
                 <h2 class="text-lg font-semibold text-black">Information</h2>
               </div>
-              
+
               <div class="space-y-3">
-                <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
-                  <CardContent class="flex items-center justify-between p-4 cursor-pointer">
+                <Card
+                  class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                >
+                  <CardContent
+                    class="flex items-center justify-between p-4 cursor-pointer"
+                  >
                     <div class="flex items-center gap-3">
                       <div class="rounded-full bg-green-100 p-2">
                         <HelpCircle class="size-4 text-green-600" />
                       </div>
                       <div>
                         <p class="font-medium">About App</p>
-                        <p class="text-xs text-gray-500">Learn more about e-Prestasi</p>
+                        <p class="text-xs text-gray-500">
+                          Learn more about e-Prestasi
+                        </p>
                       </div>
                     </div>
                     <ChevronRight class="size-5 text-gray-400" />
                   </CardContent>
                 </Card>
-                
-                <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
-                  <CardContent class="flex items-center justify-between p-4 cursor-pointer">
+
+                <Card
+                  class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                >
+                  <CardContent
+                    class="flex items-center justify-between p-4 cursor-pointer"
+                  >
                     <div class="flex items-center gap-3">
                       <div class="rounded-full bg-pink-100 p-2">
                         <FileText class="size-4 text-pink-600" />
                       </div>
                       <div>
                         <p class="font-medium">Terms & Conditions</p>
-                        <p class="text-xs text-gray-500">Read our terms of service</p>
+                        <p class="text-xs text-gray-500">
+                          Read our terms of service
+                        </p>
                       </div>
                     </div>
                     <ChevronRight class="size-5 text-gray-400" />
                   </CardContent>
                 </Card>
-                
-                <Card class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors">
-                  <CardContent class="flex items-center justify-between p-4 cursor-pointer">
+
+                <Card
+                  class="border-none bg-gray-50/80 hover:bg-gray-50 transition-colors"
+                >
+                  <CardContent
+                    class="flex items-center justify-between p-4 cursor-pointer"
+                  >
                     <div class="flex items-center gap-3">
                       <div class="rounded-full bg-indigo-100 p-2">
                         <Shield class="size-4 text-indigo-600" />
                       </div>
                       <div>
                         <p class="font-medium">Privacy Policy</p>
-                        <p class="text-xs text-gray-500">How we protect your data</p>
+                        <p class="text-xs text-gray-500">
+                          How we protect your data
+                        </p>
                       </div>
                     </div>
                     <ChevronRight class="size-5 text-gray-400" />
@@ -174,7 +212,7 @@
               </div>
             </div>
           </div>
-          
+
           <!-- Right Column remains unchanged -->
           <div class="flex flex-col gap-6">
             <!-- Security Settings and Social & Sharing sections remain the same -->
@@ -206,15 +244,14 @@ import {
 import { useAuthStore } from "@/stores/authStore";
 import { storeToRefs } from "pinia";
 import { ref, watch, onMounted } from "vue";
-import { IonSpinner } from "@ionic/vue";
+// Add these Ionic component imports
+import { IonPage, IonContent, IonSpinner } from "@ionic/vue";
 import {
   PencilIcon,
   ChevronRight,
   Settings2,
   Bell,
-  
   Mail,
-  
   Globe,
   Info,
   HelpCircle,
@@ -222,7 +259,6 @@ import {
   Shield,
   LogOut,
   Sun,
-  
 } from "lucide-vue-next";
 
 import BottomSheet from "@/components/BottomSheet.vue";

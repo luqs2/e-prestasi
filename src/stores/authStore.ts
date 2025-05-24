@@ -5,8 +5,9 @@ import { useRouter } from "vue-router";
 import { toast } from "vue-sonner";
 
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref<User>();
+  const user = ref<User | null>();
   const router = useRouter();
+  const isLoading = ref(false); // Add isLoading state
 
   async function getUser() {
     const { data } = await supabase.auth.getSession();
@@ -84,13 +85,30 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   async function logout() {
-    const { error } = await supabase.auth.signOut();
+    try {
+      isLoading.value = true;
 
-    if (error) {
-      console.error("Error logging out:", error.message);
-    } else {
-      user.value = undefined;
-      router.push("/login");
+      // First, sign out from Supabase
+      await supabase.auth.signOut();
+
+      // Clear user data
+      user.value = null;
+
+      // Set a flag to indicate logged out status
+      localStorage.removeItem("sb-user-authed");
+
+      // Add a slight delay to allow Ionic to complete its cleanup
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      // Use replace instead of push to clear navigation history
+      router.replace("/login");
+
+      return true;
+    } catch (error) {
+      console.error("Error during logout:", error);
+      return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -210,5 +228,6 @@ export const useAuthStore = defineStore("auth", () => {
     updateAvatar,
     uploadAvatar,
     updateAvatarFromUrl,
+    isLoading, // Expose isLoading state
   };
 });

@@ -398,13 +398,27 @@ export const useClassStore = defineStore("class", () => {
     criteriaId: number,
     criteriaData: any
   ) {
+    // Optional: First verify the criteria belongs to this class through the join table
+    const { error: relationError } = await supabase
+      .from("class_criterias")
+      .select("*")
+      .eq("class_id", classId)
+      .eq("criteria_id", criteriaId)
+      .single();
+
+    if (relationError) {
+      console.error("Error verifying criteria relationship:", relationError.message);
+      throw relationError;
+    }
+
+    // Then update the criteria itself (only filtering by criteria ID)
     const { data, error } = await supabase
       .from("criterias")
       .update(criteriaData)
-      .eq("id", criteriaId)
-      .eq("class_id", classId);
+      .eq("id", criteriaId);
 
     if (error) {
+      console.error("Error updating criteria:", error.message);
       throw error;
     }
 

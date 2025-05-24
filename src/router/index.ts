@@ -9,6 +9,11 @@ const routes: Array<RouteRecordRaw> = [
     redirect: "/login",
   },
   {
+  path: '/splash',
+  name: 'Splash',
+  component: () => import('@/views/SplashScreen.vue')
+},
+  {
     path: "/login",
     name: "Login",
     component: () => import("../views/Auth/LoginPage.vue"),

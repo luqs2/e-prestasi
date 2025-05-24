@@ -3,80 +3,208 @@
   <PageContainer v-bind="$attrs">
     <!-- Loading spinner while fetching class data -->
     <div v-if="isLoading" class="flex items-center justify-center h-40">
-      <IonSpinner class="size-12" />
+      <div class="flex flex-col items-center gap-4">
+        <IonSpinner class="size-12 text-primary" />
+        <p class="text-gray-500 text-sm animate-pulse">
+          Loading class details...
+        </p>
+      </div>
     </div>
 
     <!-- Main content when class details are loaded -->
     <div v-else-if="classDetails" class="flex flex-col gap-6">
-      <!-- Class header with back button and basic info -->
-      <div class="flex items-center gap-4">
-        <Button variant="outline" size="iconsm" @click="router.back()">
-          <ChevronLeft class="size-6 text-primary" />
+      <!-- Redesigned class header with back button and basic info -->
+      <div
+        class="flex items-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-2xl shadow-sm"
+      >
+        <Button
+          variant="outline"
+          size="icon"
+          class="rounded-xl"
+          @click="router.back()"
+        >
+          <ChevronLeft class="size-5 text-primary/50" />
         </Button>
         <div class="flex items-center justify-between w-full">
           <div class="flex flex-col">
-            <span class="font-light">{{ classDetails.classCode }}</span>
-            <span class="font-bold">{{ classDetails.className }}</span>
+            <div
+              class="bg-white/30 text-[10px] font-medium py-0.5 px-2 rounded-full w-fit mb-1 backdrop-blur-sm"
+            >
+              <span class="text-black text-sm">{{
+                classDetails.classCode
+              }}</span>
+            </div>
+            <span class="font-bold text-lg">{{ classDetails.className }}</span>
           </div>
-          <div>
-            <Avatar>
-              <div
-                class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold"
-              >
-                {{ classDetails.classGroup }}
-              </div>
-            </Avatar>
-          </div>
+          <Avatar class="h-10 w-10 border-2 border-white/50">
+            <div
+              class="flex h-full w-full items-center justify-center rounded-full bg-primary font-bold text-Black"
+            >
+              {{ classDetails.classGroup }}
+            </div>
+          </Avatar>
         </div>
       </div>
 
       <!-- Teacher view tabs for class management -->
       <Tabs
         default-value="overview"
-        class="flex flex-col gap-8"
+        class="flex flex-col gap-6"
         v-if="isUserClass"
       >
-        <!-- Tab navigation -->
-        <TabsList class="w-full">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
-          <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="criteria">Criterias</TabsTrigger>
+        <!-- Redesigned tab navigation -->
+        <TabsList class="w-full bg-gray-50 p-1 rounded-xl">
+          <TabsTrigger
+            value="overview"
+            class="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            <div
+              class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-1"
+            >
+              <LayoutDashboard class="size-4" />
+              <span class="text-xs sm:text-sm">Overview</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="students"
+            class="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            <div
+              class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-1"
+            >
+              <Users class="size-4" />
+              <span class="text-xs sm:text-sm">Students</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="tasks"
+            class="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            <div
+              class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-1"
+            >
+              <ClipboardList class="size-4" />
+              <span class="text-xs sm:text-sm">Tasks</span>
+            </div>
+          </TabsTrigger>
+          <TabsTrigger
+            value="criteria"
+            class="data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            <div
+              class="flex flex-col sm:flex-row items-center gap-1 sm:gap-2 py-1"
+            >
+              <CheckCircle class="size-4" />
+              <span class="text-xs sm:text-sm">Criteria</span>
+            </div>
+          </TabsTrigger>
         </TabsList>
 
         <!-- Overview tab content -->
-        <TabsContent value="overview">
+        <TabsContent value="overview" class="mt-0">
           <!-- Quick actions card -->
-          <Card class="bg-primary text-primary-foreground" variant="dark">
-            <CardContent class="p-4">
+          <Card
+            class="bg-gradient-to-r from-primary/90 to-primary/70 text-white rounded-xl overflow-hidden border-none shadow-md"
+          >
+            <CardContent class="p-6">
+              <h3 class="font-semibold text-lg mb-4 text-black">
+                Quick Actions
+              </h3>
               <div class="flex justify-around">
                 <!-- Share class button -->
                 <div
-                  class="flex flex-col items-center gap-2 cursor-pointer"
+                  class="flex flex-col items-center gap-3 cursor-pointer group"
                   @click="handleShareClass"
                 >
-                  <Button variant="outline" size="icon" class="bg-secondary">
-                    <Share2 class="h-6 w-6 text-primary" />
-                  </Button>
-                  <span class="text-xs text-primary">Share Class</span>
+                  <div
+                    class="p-3 rounded-full bg-white/30 backdrop-blur-sm group-hover:bg-white/50 transition-all"
+                  >
+                    <Share2 class="h-6 w-6 text-black" />
+                  </div>
+                  <span class="text-sm font-medium text-black"
+                    >Share Class</span
+                  >
                 </div>
 
                 <!-- Add/change class image button -->
                 <div
-                  class="flex flex-col items-center gap-2 cursor-pointer"
+                  class="flex flex-col items-center gap-3 cursor-pointer group"
                   @click="isImageSelectorOpen = true"
                 >
-                  <Button variant="outline" size="icon" class="bg-secondary">
-                    <ImageIcon class="h-6 w-6 text-primary" />
-                  </Button>
-                  <span class="text-xs text-primary">Class Image</span>
+                  <div
+                    class="p-3 rounded-full bg-white/30 backdrop-blur-sm group-hover:bg-white/50 transition-all"
+                  >
+                    <ImageIcon class="h-6 w-6 text-black" />
+                  </div>
+                  <span class="text-sm font-medium text-black"
+                    >Class Image</span
+                  >
                 </div>
               </div>
             </CardContent>
           </Card>
 
+          <!-- Class statistics card -->
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <!-- Student count -->
+            <Card
+              class="bg-white/80 backdrop-blur-sm hover:shadow-md transition-all overflow-hidden border-none"
+            >
+              <CardContent class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="rounded-full bg-blue-100 p-3">
+                    <Users class="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Students</p>
+                    <p class="text-2xl font-semibold">{{ students.length }}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Criteria count -->
+            <Card
+              class="bg-white/80 backdrop-blur-sm hover:shadow-md transition-all overflow-hidden border-none"
+            >
+              <CardContent class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="rounded-full bg-green-100 p-3">
+                    <CheckCircle class="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Criteria Sets</p>
+                    <p class="text-2xl font-semibold">{{ criterias.length }}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <!-- Task count -->
+            <Card
+              class="bg-white/80 backdrop-blur-sm hover:shadow-md transition-all overflow-hidden border-none"
+            >
+              <CardContent class="p-4">
+                <div class="flex items-center gap-3">
+                  <div class="rounded-full bg-amber-100 p-3">
+                    <ClipboardList class="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-500">Tasks</p>
+                    <p class="text-2xl font-semibold">
+                      {{ classTasks.length }}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
           <!-- Class background image display -->
-          <Card v-if="classDetails.class_img" class="mt-4 overflow-hidden">
+          <Card
+            v-if="classDetails.class_img"
+            class="mt-5 overflow-hidden rounded-xl border-none shadow-sm"
+          >
             <CardContent class="p-0">
               <div class="relative">
                 <img
@@ -87,7 +215,7 @@
                 <Button
                   variant="secondary"
                   size="sm"
-                  class="absolute top-2 right-2 opacity-90 bg-white"
+                  class="absolute top-3 right-3 opacity-90 bg-white/80 backdrop-blur-sm rounded-full"
                   @click="isImageSelectorOpen = true"
                 >
                   <PencilIcon class="h-4 w-4 mr-1" /> Change
@@ -99,20 +227,25 @@
           <!-- Empty state for class image -->
           <div
             v-else
-            class="flex flex-col items-center justify-center mt-4 p-6 border-2 border-dashed rounded-lg border-muted-foreground/25 cursor-pointer"
+            class="flex flex-col items-center justify-center mt-5 p-8 bg-gray-50 rounded-xl border border-gray-100 cursor-pointer transition-all hover:bg-gray-100/80"
             @click="isImageSelectorOpen = true"
           >
-            <ImagePlusIcon class="h-12 w-12 text-muted-foreground mb-2" />
-            <p class="text-muted-foreground">Add a class background image</p>
-            <Button variant="outline" size="sm" class="mt-2"
-              >Select Image</Button
-            >
+            <ImagePlusIcon class="h-12 w-12 text-primary/30 mb-3" />
+            <p class="text-gray-500 font-medium">
+              Add a class background image
+            </p>
+            <p class="text-sm text-gray-400 mb-4">
+              Choose an image that represents this class
+            </p>
+            <Button variant="outline" size="sm" class="rounded-full px-4">
+              Select Image
+            </Button>
           </div>
 
           <!-- Danger zone section for class deletion -->
-          <div class="mt-8 flex flex-col gap-4">
-            <Card class="border-destructive/30">
-              <CardContent class="p-4">
+          <div class="mt-8">
+            <Card class="border-destructive/30 rounded-xl overflow-hidden">
+              <CardContent class="p-5">
                 <div class="flex items-center justify-between">
                   <div>
                     <h3 class="font-medium text-destructive">Danger Zone</h3>
@@ -123,6 +256,7 @@
                   <Button
                     variant="destructive"
                     size="sm"
+                    class="rounded-full"
                     @click="isDeleteClassDialogOpen = true"
                   >
                     Delete Class
@@ -134,249 +268,320 @@
         </TabsContent>
 
         <!-- Students tab content -->
-        <TabsContent value="students">
-          <div class="flex flex-col gap-4">
-            <h2 class="text-xl font-bold">Student List</h2>
-            <!-- Student cards with points -->
-            <Card v-for="student in students" :key="student.id">
-              <CardContent class="flex justify-between">
-                <p>
-                  {{ student.profiles.firstName }}
-                  {{ student.profiles.lastName }}
+        <TabsContent value="students" class="mt-0">
+          <div class="flex flex-col gap-5">
+            <h2 class="text-xl font-bold text-black">Student List</h2>
+
+            <!-- Empty state for no students -->
+            <div
+              v-if="students.length === 0"
+              class="bg-gray-50 rounded-xl p-10 text-center border border-gray-100"
+            >
+              <div class="max-w-md mx-auto">
+                <div class="text-primary/30 mb-4">
+                  <Users class="size-12 mx-auto" />
+                </div>
+                <p class="text-gray-500 mb-2">
+                  No students have joined this class yet
                 </p>
-                <Badge>
-                  {{ student.points }}
-                </Badge>
-              </CardContent>
-            </Card>
+                <p class="text-gray-400 text-sm">
+                  Share your class code to invite students
+                </p>
+              </div>
+            </div>
+
+            <!-- Student cards with points -->
+            <div v-else class="grid gap-3">
+              <Card
+                v-for="student in students"
+                :key="student.id"
+                class="overflow-hidden border-none shadow-sm hover:shadow-md transition-all"
+              >
+                <CardContent class="p-4 flex items-center justify-between">
+                  <div class="flex items-center gap-3">
+                    <Avatar class="h-10 w-10 border border-primary/20">
+                      <AvatarImage
+                        v-if="student.profiles.user_avatar"
+                        :src="student.profiles.user_avatar"
+                        :alt="`${student.profiles.firstName} ${student.profiles.lastName}`"
+                      />
+                      <AvatarFallback
+                        class="bg-primary/10 text-primary font-medium"
+                      >
+                        {{ student.profiles.firstName[0]
+                        }}{{ student.profiles.lastName[0] }}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p class="font-medium">
+                        {{ student.profiles.firstName }}
+                        {{ student.profiles.lastName }}
+                      </p>
+                      <p class="text-xs text-muted-foreground">Student</p>
+                    </div>
+                  </div>
+                  <Badge
+                    class="bg-primary/10 text-primary font-extrabold hover:bg-primary/20 px-3 py-1"
+                  >
+                    {{ student.points }} points
+                  </Badge>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </TabsContent>
 
         <!-- Tasks tab content -->
-        <TabsContent value="tasks">
-          <div class="flex flex-col gap-4">
+        <TabsContent value="tasks" class="mt-0">
+          <div class="flex flex-col gap-5">
             <!-- Tasks header with add button -->
             <div class="flex justify-between items-center">
-              <h2 class="text-xl font-bold">Tasks Management</h2>
-              <Button variant="outline" @click="isAddTaskOpen = true">
+              <h2 class="text-xl font-bold text-black">Tasks Management</h2>
+              <Button
+                variant="outline"
+                class="rounded-full"
+                @click="isAddTaskOpen = true"
+              >
                 <PlusCircleIcon class="h-4 w-4 mr-2" />
                 Add Task
               </Button>
             </div>
 
-            <!-- Task list with status indicators -->
-            <Card
-              v-for="task in sortedTasks"
-              :key="task.id"
-              class="mb-3 overflow-hidden border-l-4"
-              :class="{
-                'border-green-500': getTaskStatus(task).status === 'New',
-                'border-amber-500':
-                  getTaskStatus(task).status === 'Ending Soon',
-                'border-gray-400': getTaskStatus(task).status === 'Ended',
-                'border-gray-300': getTaskStatus(task).status === 'Active',
-                'opacity-60':
-                  getTaskStatus(task).status ===
-                  'Ended' /* Grey out ended tasks */,
-              }"
-            >
-              <CardContent class="p-5">
-                <div class="flex justify-between items-start gap-4">
-                  <div class="flex-1">
-                    <h3
-                      class="font-semibold text-lg mb-1"
-                      :class="{
-                        'text-gray-500': getTaskStatus(task).status === 'Ended',
-                      }"
-                    >
-                      {{ task.task_name }}
-                    </h3>
-                    <p
-                      class="text-sm"
-                      :class="
-                        getTaskStatus(task).status === 'Ended'
-                          ? 'text-gray-400'
-                          : 'text-muted-foreground'
-                      "
-                    >
-                      {{ task.description }}
-                    </p>
-                  </div>
-                  <div class="flex flex-col items-end">
-                    <!-- Task dates -->
-                    <div
-                      class="flex items-center text-sm text-muted-foreground mb-1"
-                    >
-                      <CalendarIcon class="h-4 w-4 mr-1" />
-                      <span>Due: {{ formatDate(task.end_date) }}</span>
-                    </div>
-
-                    <div
-                      class="flex items-center text-sm text-muted-foreground mb-2"
-                    >
-                      <Clock class="h-4 w-4 mr-1" />
-                      <span
-                        >Created: {{ formatDate(task.created_at || "") }}</span
-                      >
-                    </div>
-
-                    <!-- Task status badge -->
-                    <Badge
-                      :class="{
-                        'bg-green-500 hover:bg-green-600':
-                          getTaskStatus(task).status === 'New',
-                        'bg-amber-500 hover:bg-amber-600':
-                          getTaskStatus(task).status === 'Ending Soon',
-                        'bg-gray-400 hover:bg-gray-500':
-                          getTaskStatus(task).status === 'Ended',
-                      }"
-                    >
-                      {{ getTaskStatus(task).status }}
-                    </Badge>
-
-                    <!-- Task action buttons -->
-                    <div class="flex items-center gap-2 mt-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        @click="handleEditTask(task)"
-                        title="Edit task"
-                      >
-                        <PencilIcon class="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        @click="confirmDeleteTask(task.id)"
-                        title="Delete task"
-                      >
-                        <TrashIcon class="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <!-- Empty state for tasks -->
             <div
               v-if="classTasks.length === 0"
-              class="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg"
+              class="bg-gray-50 rounded-xl p-10 text-center border border-gray-100"
             >
-              <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-              <p class="text-muted-foreground font-medium">
-                No tasks created yet
-              </p>
-              <p class="text-sm text-muted-foreground/70 mt-1">
-                Add tasks for your students
-              </p>
+              <div class="max-w-md mx-auto">
+                <div class="text-primary/30 mb-4">
+                  <ClipboardList class="size-12 mx-auto" />
+                </div>
+                <p class="text-gray-500 mb-2">No tasks created yet</p>
+                <p class="text-gray-400 text-sm mb-5">
+                  Add tasks for your students
+                </p>
+                <Button @click="isAddTaskOpen = true" class="rounded-full px-5">
+                  <PlusCircleIcon class="size-4 mr-2" />
+                  Create Task
+                </Button>
+              </div>
+            </div>
+
+            <!-- Task list with status indicators -->
+            <div v-else class="grid gap-3">
+              <Card
+                v-for="task in sortedTasks"
+                :key="task.id"
+                class="overflow-hidden border-none shadow-sm hover:shadow-md transition-all relative"
+                :class="{
+                  'opacity-60': getTaskStatus(task).status === 'Ended',
+                }"
+              >
+                <div
+                  class="absolute inset-y-0 left-0 w-1"
+                  :class="{
+                    'bg-green-500': getTaskStatus(task).status === 'New',
+                    'bg-amber-500':
+                      getTaskStatus(task).status === 'Ending Soon',
+                    'bg-gray-400': getTaskStatus(task).status === 'Ended',
+                    'bg-blue-400': getTaskStatus(task).status === 'Active',
+                  }"
+                ></div>
+                <CardContent class="p-5 pl-6">
+                  <div class="flex justify-between items-start gap-4">
+                    <div class="flex-1">
+                      <h3
+                        class="font-semibold text-lg mb-1"
+                        :class="{
+                          'text-gray-500':
+                            getTaskStatus(task).status === 'Ended',
+                        }"
+                      >
+                        {{ task.task_name }}
+                      </h3>
+                      <p
+                        class="text-sm"
+                        :class="
+                          getTaskStatus(task).status === 'Ended'
+                            ? 'text-gray-400'
+                            : 'text-muted-foreground'
+                        "
+                      >
+                        {{ task.description }}
+                      </p>
+                    </div>
+                    <div class="flex flex-col items-end">
+                      <!-- Task dates -->
+                      <div
+                        class="flex items-center text-sm text-muted-foreground mb-1"
+                      >
+                        <CalendarIcon class="h-4 w-4 mr-1" />
+                        <span>Due: {{ formatDate(task.end_date) }}</span>
+                      </div>
+
+                      <div
+                        class="flex items-center text-sm text-muted-foreground mb-3"
+                      >
+                        <Clock class="h-4 w-4 mr-1" />
+                        <span
+                          >Created:
+                          {{ formatDate(task.created_at || "") }}</span
+                        >
+                      </div>
+
+                      <!-- Task status badge -->
+                      <Badge
+                        class="rounded-full px-3"
+                        :class="{
+                          'bg-green-500 hover:bg-green-600':
+                            getTaskStatus(task).status === 'New',
+                          'bg-amber-500 hover:bg-amber-600':
+                            getTaskStatus(task).status === 'Ending Soon',
+                          'bg-gray-400 hover:bg-gray-500':
+                            getTaskStatus(task).status === 'Ended',
+                          'bg-blue-400 hover:bg-blue-500':
+                            getTaskStatus(task).status === 'Active',
+                        }"
+                      >
+                        {{ getTaskStatus(task).status }}
+                      </Badge>
+
+                      <!-- Task action buttons -->
+                      <div class="flex items-center gap-2 mt-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          class="rounded-full h-8 w-8 p-0"
+                          @click="handleEditTask(task)"
+                          title="Edit task"
+                        >
+                          <PencilIcon class="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          class="rounded-full h-8 w-8 p-0"
+                          @click="confirmDeleteTask(task.id)"
+                          title="Delete task"
+                        >
+                          <TrashIcon class="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </TabsContent>
 
         <!-- Criteria tab content -->
-        <TabsContent value="criteria">
-          <div class="flex flex-col gap-4">
+        <TabsContent value="criteria" class="mt-0">
+          <div class="flex flex-col gap-5">
             <div class="flex justify-between items-center">
-              <h2 class="text-xl font-bold">Criteria Management</h2>
+              <h2 class="text-xl font-bold text-black">Criteria Management</h2>
             </div>
 
             <!-- Empty state for criteria -->
             <div
               v-if="criterias.length === 0"
-              class="flex flex-col items-center justify-center py-10 px-4 bg-muted/20 rounded-lg"
+              class="bg-gray-50 rounded-xl p-10 text-center border border-gray-100"
             >
-              <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-              <p class="text-muted-foreground font-medium">
-                No criteria defined yet
-              </p>
-              <p class="text-sm text-muted-foreground/70 mt-1">
-                Add criteria to evaluate student performance
-              </p>
+              <div class="max-w-md mx-auto">
+                <div class="text-primary/30 mb-4">
+                  <CheckCircle class="size-12 mx-auto" />
+                </div>
+                <p class="text-gray-500 mb-2">No criteria defined yet</p>
+                <p class="text-gray-400 text-sm mb-5">
+                  Add criteria to evaluate student performance
+                </p>
+                <Button
+                  @click="isAddCriteriaOpen = true"
+                  class="rounded-full px-5"
+                >
+                  <PlusCircleIcon class="size-4 mr-2" />
+                  Add Criteria
+                </Button>
+              </div>
             </div>
 
             <!-- Criteria list with actions -->
-            <Card
-              v-for="criteria in criterias"
-              :key="criteria.id"
-              class="overflow-hidden"
-            >
-              <CardContent class="p-4 flex items-center justify-between">
-                <div class="flex-1">
-                  <h3 class="font-medium">{{ criteria.name }}</h3>
-                  <p
-                    v-if="criteria.description"
-                    class="text-sm text-muted-foreground"
-                  >
-                    {{ criteria.description }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Badge class="mr-2"> {{ criteria.value || 1 }} points </Badge>
-                  <!-- Criteria action buttons -->
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="handleScanCriteria(criteria.id)"
-                    title="Scan QR to award points"
-                  >
-                    <QrCodeIcon class="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="handleEditCriteria(criteria)"
-                    title="Edit criteria"
-                  >
-                    <PencilIcon class="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    @click="confirmDeleteCriteria(criteria.id)"
-                    title="Delete criteria"
-                  >
-                    <TrashIcon class="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div v-else class="grid gap-3">
+              <Card
+                v-for="criteria in criterias"
+                :key="criteria.id"
+                class="overflow-hidden border-none shadow-sm hover:shadow-md transition-all"
+              >
+                <CardContent class="p-4 flex items-center justify-between">
+                  <div class="flex-1">
+                    <h3 class="font-medium">{{ criteria.name }}</h3>
+                    <p
+                      v-if="criteria.description"
+                      class="text-sm text-muted-foreground"
+                    >
+                      {{ criteria.description }}
+                    </p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <Badge
+                      class="bg-primary/10 text-primary hover:bg-primary/20 px-3"
+                    >
+                      {{ criteria.value || 1 }} points
+                    </Badge>
+                    <!-- Criteria action buttons -->
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      class="rounded-full h-8 w-8 p-0"
+                      @click="handleScanCriteria(criteria.id)"
+                      title="Scan QR to award points"
+                    >
+                      <QrCodeIcon class="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      class="rounded-full h-8 w-8 p-0"
+                      @click="handleEditCriteria(criteria)"
+                      title="Edit criteria"
+                    >
+                      <PencilIcon class="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      class="rounded-full h-8 w-8 p-0"
+                      @click="confirmDeleteCriteria(criteria.id)"
+                      title="Delete criteria"
+                    >
+                      <TrashIcon class="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
             <!-- Add new criteria button -->
             <Button
-              class="w-full flex items-center justify-center mt-4"
+              class="w-full flex items-center justify-center mt-2 rounded-xl py-5"
               variant="outline"
               @click="isAddCriteriaOpen = true"
             >
               <PlusCircleIcon class="h-5 w-5 mr-2" />
               <span>Add New Evaluation Criteria</span>
             </Button>
-
-            <!-- Criteria management dialogs -->
-            <AddCriteriaSheet
-              v-model:open="isAddCriteriaOpen"
-              :classId="classDetails.id"
-              :onSuccess="refreshCriterias"
-            />
-
-            <EditCriteriaSheet
-              v-model:open="isEditCriteriaOpen"
-              :classId="classDetails.id"
-              :criteria="selectedCriteria || {}"
-              :onSuccess="refreshCriterias"
-            />
           </div>
         </TabsContent>
       </Tabs>
 
       <!-- Student view content -->
-      <div v-else class="flex flex-col gap-4">
+      <div v-else class="flex flex-col gap-5">
         <!-- Leave class button -->
         <div class="flex justify-end">
           <Button
             variant="outline"
             size="sm"
-            class="text-destructive border-destructive/30 hover:bg-destructive/10"
+            class="text-destructive border-destructive/30 hover:bg-destructive/10 rounded-full"
             @click="isLeaveClassDialogOpen = true"
           >
             Leave Class
@@ -384,71 +589,85 @@
         </div>
 
         <!-- Student's task list -->
-        <h2 class="text-xl font-bold mb-2">Your Tasks</h2>
-
-        <Card
-          v-for="task in classTasks"
-          :key="task.id"
-          class="mb-3 overflow-hidden border-l-4"
-          :class="{
-            'border-green-500': getTaskStatus(task).status === 'New',
-            'border-amber-500': getTaskStatus(task).status === 'Ending Soon',
-            'border-red-500': getTaskStatus(task).status === 'Overdue',
-            'border-gray-300': getTaskStatus(task).status === 'Active',
-          }"
-        >
-          <CardContent class="p-5">
-            <div class="flex justify-between items-start gap-4">
-              <div class="flex-1">
-                <h3 class="font-semibold text-lg mb-1">{{ task.task_name }}</h3>
-                <p class="text-sm text-muted-foreground">
-                  {{ task.description }}
-                </p>
-              </div>
-              <div class="flex flex-col items-end">
-                <!-- Task dates -->
-                <div
-                  class="flex items-center text-sm text-muted-foreground mb-1"
-                >
-                  <CalendarIcon class="h-4 w-4 mr-1" />
-                  <span>Due: {{ formatDate(task.end_date) }}</span>
-                </div>
-
-                <div
-                  class="flex items-center text-sm text-muted-foreground mb-2"
-                >
-                  <Clock class="h-4 w-4 mr-1" />
-                  <span>Created: {{ formatDate(task.created_at || "") }}</span>
-                </div>
-
-                <!-- Task status badge -->
-                <Badge
-                  :class="{
-                    'bg-green-500 hover:bg-green-600':
-                      getTaskStatus(task).status === 'New',
-                    'bg-amber-500 hover:bg-amber-600':
-                      getTaskStatus(task).status === 'Ending Soon',
-                    'bg-red-500 hover:bg-red-600':
-                      getTaskStatus(task).status === 'Overdue',
-                  }"
-                >
-                  {{ getTaskStatus(task).status }}
-                </Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <h2 class="text-xl font-bold text-black mb-2">Your Tasks</h2>
 
         <!-- Empty state for student tasks -->
         <div
           v-if="classTasks.length === 0"
-          class="flex flex-col items-center justify-center py-12 px-4 bg-muted/20 rounded-lg"
+          class="bg-gray-50 rounded-xl p-10 text-center border border-gray-100"
         >
-          <ClipboardList class="h-14 w-14 text-muted-foreground mb-3" />
-          <p class="text-muted-foreground font-medium">No tasks assigned yet</p>
-          <p class="text-sm text-muted-foreground/70 mt-1">
-            Check back later for updates
-          </p>
+          <div class="max-w-md mx-auto">
+            <div class="text-primary/30 mb-4">
+              <ClipboardList class="size-12 mx-auto" />
+            </div>
+            <p class="text-gray-500 mb-2">No tasks assigned yet</p>
+            <p class="text-gray-400 text-sm">Check back later for updates</p>
+          </div>
+        </div>
+
+        <div v-else class="grid gap-3">
+          <Card
+            v-for="task in classTasks"
+            :key="task.id"
+            class="overflow-hidden border-none shadow-sm hover:shadow-md transition-all"
+          >
+            <div
+              class="absolute inset-y-0 left-0 w-1"
+              :class="{
+                'bg-green-500': getTaskStatus(task).status === 'New',
+                'bg-amber-500': getTaskStatus(task).status === 'Ending Soon',
+                'bg-red-500': getTaskStatus(task).status === 'Overdue',
+                'bg-blue-400': getTaskStatus(task).status === 'Active',
+              }"
+            ></div>
+            <CardContent class="p-5 pl-6">
+              <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                  <h3 class="font-semibold text-lg mb-1">
+                    {{ task.task_name }}
+                  </h3>
+                  <p class="text-sm text-muted-foreground">
+                    {{ task.description }}
+                  </p>
+                </div>
+                <div class="flex flex-col items-end">
+                  <!-- Task dates -->
+                  <div
+                    class="flex items-center text-sm text-muted-foreground mb-1"
+                  >
+                    <CalendarIcon class="h-4 w-4 mr-1" />
+                    <span>Due: {{ formatDate(task.end_date) }}</span>
+                  </div>
+
+                  <div
+                    class="flex items-center text-sm text-muted-foreground mb-3"
+                  >
+                    <Clock class="h-4 w-4 mr-1" />
+                    <span
+                      >Created: {{ formatDate(task.created_at || "") }}</span
+                    >
+                  </div>
+
+                  <!-- Task status badge -->
+                  <Badge
+                    class="rounded-full px-3"
+                    :class="{
+                      'bg-green-500 hover:bg-green-600':
+                        getTaskStatus(task).status === 'New',
+                      'bg-amber-500 hover:bg-amber-600':
+                        getTaskStatus(task).status === 'Ending Soon',
+                      'bg-red-500 hover:bg-red-600':
+                        getTaskStatus(task).status === 'Overdue',
+                      'bg-blue-400 hover:bg-blue-500':
+                        getTaskStatus(task).status === 'Active',
+                    }"
+                  >
+                    {{ getTaskStatus(task).status }}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
@@ -465,7 +684,7 @@
       :open="isDeleteDialogOpen"
       @update:open="isDeleteDialogOpen = $event"
     >
-      <DialogContent>
+      <DialogContent class="bg-white text-black rounded-xl">
         <DialogHeader>
           <DialogTitle>
             <span class="text-destructive">Delete Criteria</span>
@@ -478,10 +697,16 @@
           </DialogDescription>
         </DialogHeader>
         <div class="flex justify-end space-x-2 pt-4">
-          <Button variant="outline" @click="isDeleteDialogOpen = false"
+          <Button
+            variant="outline"
+            class="rounded-full"
+            @click="isDeleteDialogOpen = false"
             ><span class="text-secondary">Cancel</span></Button
           >
-          <Button variant="destructive" @click="confirmDelete"
+          <Button
+            variant="destructive"
+            class="rounded-full"
+            @click="confirmDelete"
             ><span class="text-secondary">Delete</span></Button
           >
         </div>
@@ -665,6 +890,21 @@
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <!-- Add criteria dialog -->
+    <AddCriteriaSheet
+      v-model:open="isAddCriteriaOpen"
+      :classId="classDetails?.id || 0"
+      :onSuccess="refreshCriterias"
+    />
+
+    <!-- Edit criteria dialog -->
+    <EditCriteriaSheet
+      v-model:open="isEditCriteriaOpen"
+      :classId="classDetails?.id || 0"
+      :criteria="selectedCriteria || {}"
+      :onSuccess="refreshCriterias"
+    />
   </PageContainer>
 </template>
 
@@ -674,7 +914,7 @@ import ClassImageSelector from "@/components/ClassImageSelector.vue";
 import EditCriteriaSheet from "@/components/EditCriteriaSheet.vue";
 import PageContainer from "@/components/PageContainer.vue";
 import TaskForm from "@/components/TaskForm.vue";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -707,6 +947,9 @@ import {
   QrCodeIcon,
   Share2,
   TrashIcon,
+  Users,
+  LayoutDashboard,
+  CheckCircle,
 } from "lucide-vue-next";
 import { storeToRefs } from "pinia";
 import { QrcodeSvg } from "qrcode.vue";

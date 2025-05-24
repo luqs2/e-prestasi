@@ -74,8 +74,7 @@ onMounted(() => {
 
 function generateAvatars() {
   const styles = [
-    "avataaars",
-    "pixel-art",
+
     "bottts",
     "lorelei",
     "personas",

@@ -232,21 +232,86 @@ export const useClassStore = defineStore("class", () => {
     return data as Class;
   }
 
-  async function getJoinedClassById(classId: number) {
+async function getJoinedClassById(classId: number) {
+  try {
+    const userId = (await supabase.auth.getSession()).data.session?.user.id;
+    
+    // First check if this is a class the user created (teacher's class)
+    const { data: ownedClass, error: ownedError } = await supabase
+      .from("classes")
+      .select("*")
+      .eq("id", classId)
+      .eq("user_id", userId)
+      .single();
+    
+    // If the user is the teacher of this class, return it
+    if (!ownedError && ownedClass) {
+      return {
+        ...ownedClass,
+        points: 0,
+        pointsHistory: []
+      } as ClassWithPoints;
+    }
+    
+    // Otherwise check if this is a class the user joined (student)
     const { data, error } = await supabase
       .from("student_class")
-      .select("*")
+      .select(
+        `points, pointsHistory, classes(
+          id,
+          className,
+          classCode,
+          day,
+          timeFrom,
+          timeTo,
+          classGroup,
+          user_id,
+          class_img,
+          created_at)
+        `
+      )
       .eq("class_id", classId)
-      .single();
+      .eq("user_id", userId);
 
-    if (error) {
-      console.error("Error fetching joined class details:", error.message);
-      throw error;
+    // If no enrollment found or error occurred, throw informative error
+    if (error || !data || data.length === 0) {
+      console.error("Error fetching joined class details:", error?.message || "No enrollment found");
+      throw new Error("You are not enrolled in this class");
     }
 
-    return data as ClassWithPoints;
-  }
+    // Get the first result since we're filtering by user_id and class_id
+    const enrollment = data[0];
+    
+    // Check if classes exists and properly extract it
+    if (!enrollment.classes) {
+      console.error("No class data returned");
+      throw new Error("Class details not found");
+    }
 
+    // Transform the response to match the expected format
+    const classInfo = Array.isArray(enrollment.classes) 
+      ? enrollment.classes[0] 
+      : enrollment.classes;
+    
+    return {
+      id: classInfo.id,
+      className: classInfo.className,
+      classCode: classInfo.classCode,
+      day: classInfo.day,
+      timeFrom: classInfo.timeFrom,
+      timeTo: classInfo.timeTo,
+      classGroup: classInfo.classGroup,
+      user_id: classInfo.user_id,
+      class_img: classInfo.class_img,
+      created_at: classInfo.created_at,
+      points: enrollment.points,
+      pointsHistory: enrollment.pointsHistory
+    } as ClassWithPoints;
+  } catch (error) {
+    console.error("Error in getJoinedClassById:", error);
+    throw error;
+  }
+}
   async function getStudentsInClass(classId: number) {
     console.log("Fetching students in class with ID:", classId);
     const { data, error } = await supabase

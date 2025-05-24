@@ -169,7 +169,9 @@
 
     <!-- Points History Section -->
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-black mb-4">Points History</h2>
+      <h2 class="text-xl font-bold text-black mb-4">
+        {{ isTeacher ? "Student Points History" : "Points History" }}
+      </h2>
 
       <!-- Loading state -->
       <div v-if="loadingCriterias" class="flex items-center justify-center h-20">
@@ -181,7 +183,7 @@
 
       <!-- Empty state for no criteria -->
       <div
-        v-else-if="criterias.length === 0"
+        v-else-if="(isTeacher && allStudentPointsHistory.length === 0) || (!isTeacher && criterias.length === 0)"
         class="bg-gray-50 rounded-xl p-10 text-center border border-gray-100"
       >
         <div class="max-w-md mx-auto">
@@ -189,12 +191,43 @@
             <History class="size-12 mx-auto" />
           </div>
           <p class="text-gray-500 mb-2">No points history found</p>
-          <p class="text-gray-400 text-sm">Point records will appear here when you earn them</p>
+          <p class="text-gray-400 text-sm">
+            {{ isTeacher ? "No points have been awarded to students yet" : "Point records will appear here when you earn them" }}
+          </p>
         </div>
       </div>
 
-      <!-- Points history cards -->
-      <div v-else-if="filteredPointsHistory.length > 0" class="flex flex-col gap-2">
+      <!-- Teacher view: Points history with student names -->
+      <div v-else-if="isTeacher && allStudentPointsHistory.length > 0" class="flex flex-col gap-2">
+        <Card
+          v-for="(entry, idx) in allStudentPointsHistory"
+          :key="idx"
+          class="overflow-hidden border-none shadow-sm hover:shadow-md transition-all bg-white/80"
+        >
+          <CardContent class="p-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <div class="rounded-full bg-green-100 p-2">
+                <PlusCircle class="h-4 w-4 text-green-600" />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <p class="font-medium text-sm">{{ entry.criteriaName }}</p>
+                  <Badge class="bg-blue-50 text-blue-700 text-xs">{{ entry.studentName }}</Badge>
+                </div>
+                <p class="text-xs text-muted-foreground">
+                  {{ formatDate(entry.date) }}
+                </p>
+              </div>
+            </div>
+            <Badge class="bg-green-50 text-green-700 rounded-full px-3">
+              +{{ entry.points }} points
+            </Badge>
+          </CardContent>
+        </Card>
+      </div>
+
+      <!-- Student view: Points history cards (existing) -->
+      <div v-else-if="!isTeacher && filteredPointsHistory.length > 0" class="flex flex-col gap-2">
         <Card
           v-for="(entry, idx) in filteredPointsHistory"
           :key="idx"
@@ -249,6 +282,7 @@ import {
 } from "lucide-vue-next";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue-sonner"; // Add this import if not already present
 
 const router = useRouter();
 const route = useRoute();
@@ -262,6 +296,10 @@ const showAll = ref(false);
 const criterias = ref<any[]>([]);
 const loadingCriterias = ref(true);
 const currentUserId = ref<string | null>(null);
+
+// Add a new ref to track if user is a teacher
+const isTeacher = ref(false);
+const allStudentPointsHistory = ref<any[]>([]);
 
 // Sort students by points (highest first)
 const sortedStudents = computed(() => {
@@ -309,24 +347,80 @@ function isCurrentUser(student: any) {
   return student.profiles && student.profiles.id === currentUserId.value;
 }
 
-const filteredPointsHistory = computed(() => {
-  return Array.isArray(classDetails.value?.pointsHistory)
-    ? classDetails.value.pointsHistory.filter(
-        (entry) => typeof entry === "string"
-      )
-    : [];
-});
-
+// Modify the onMounted function
 onMounted(async () => {
   try {
     // Get current user ID
     const { data } = await supabase.auth.getSession();
     currentUserId.value = data.session?.user.id || null;
 
-    // Load class details
-    classDetails.value = await classStore.getJoinedClassById(classId);
+    // Check if user is teacher (owner) of this class
+    const { data: classData } = await supabase
+      .from("classes")
+      .select("user_id")
+      .eq("id", classId)
+      .single();
+    
+    isTeacher.value = classData?.user_id === currentUserId.value;
 
-    // Load students in class
+    // Load class details - with different approach for teachers
+    if (isTeacher.value) {
+      // For teachers, get class directly
+      const { data: teacherClassData } = await supabase
+        .from("classes")
+        .select("*")
+        .eq("id", classId)
+        .single();
+        
+      if (teacherClassData) {
+        classDetails.value = {
+          ...teacherClassData,
+          points: 0,
+          pointsHistory: [] // Will be populated separately for teachers
+        };
+        
+        // Fetch all students' point history for this class
+        const { data: studentClasses } = await supabase
+          .from("student_class")
+          .select("user_id, pointsHistory, profiles(firstName, lastName)")
+          .eq("class_id", classId)
+          .not("pointsHistory", "is", null);
+          
+        if (studentClasses) {
+          // Flatten all point histories with student names
+          allStudentPointsHistory.value = studentClasses.flatMap(student => {
+            if (!student.pointsHistory || !Array.isArray(student.pointsHistory)) return [];
+            
+            // Handle profiles data that might be an array or a single object
+            const profile = Array.isArray(student.profiles) ? student.profiles[0] : student.profiles;
+            
+            return student.pointsHistory.map((entry: string) => {
+              const parts = entry.split(' + ');
+              const studentName = profile ? 
+                `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : 
+                'Unknown Student';
+                
+              return {
+                criteriaName: parts[0] || 'Unknown Activity',
+                points: parts[1] || '0',
+                date: parts[2] || new Date().toISOString(),
+                studentName: studentName
+              };
+            });
+          });
+          
+          // Sort by date (newest first)
+          allStudentPointsHistory.value.sort((a, b) => 
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
+        }
+      }
+    } else {
+      // For students, use existing method
+      classDetails.value = await classStore.getJoinedClassById(classId);
+    }
+
+    // Load students in class (same for both teachers and students)
     const studentsData = await classStore.getStudentsInClass(classId);
 
     // Transform the data to match the ClassUser interface
@@ -340,14 +434,43 @@ onMounted(async () => {
       };
     });
 
-    // Load criteria for this class
-    criterias.value = classDetails.value.pointsHistory;
+    // Load criteria differently based on user role
+    if (isTeacher.value) {
+      // For teachers, we already have the history in allStudentPointsHistory
+      criterias.value = allStudentPointsHistory.value;
+    } else {
+      // For students, use the existing approach
+      criterias.value = classDetails.value?.pointsHistory || [];
+    }
   } catch (error) {
     console.error("Error loading data:", error);
+    toast.error("Failed to load report data");
   } finally {
+    // Always set loading to false to prevent infinite loading
     loading.value = false;
     loadingCriterias.value = false;
   }
+});
+
+// Modify the computed property for filteredPointsHistory
+const filteredPointsHistory = computed<string[]>(() => {
+  if (isTeacher.value) {
+    return [];
+  }
+  
+  if (!classDetails.value || !Array.isArray(classDetails.value.pointsHistory)) {
+    return [];
+  }
+  
+  // First convert to unknown type (to avoid direct number[] to string[] conversion)
+  const mixedArray = classDetails.value.pointsHistory as unknown;
+  // Then safely convert to any[] to allow filtering
+  const anyArray = mixedArray as any[];
+  
+  // Finally filter for only string values
+  return anyArray
+    .filter(entry => typeof entry === "string")
+    .map(entry => String(entry)); // Ensure each entry is definitely a string
 });
 </script>
 

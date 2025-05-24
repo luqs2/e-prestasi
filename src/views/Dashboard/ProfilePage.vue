@@ -258,7 +258,7 @@ import {
   FileText,
   Shield,
   LogOut,
-  Sun,
+
 } from "lucide-vue-next";
 
 import BottomSheet from "@/components/BottomSheet.vue";
